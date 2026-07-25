@@ -4,7 +4,7 @@ import { auth } from "./auth.js";
 export async function seedDatabase() {
   console.log("Seeding database...");
 
-  // 1. Seed Zones
+  // 1. Seed Core Zones
   const zones = [
     {
       id: "iot_lab",
@@ -94,46 +94,5 @@ export async function seedDatabase() {
     }
   }
 
-  // 3. Seed 10,000+ historical reading rows for Test 19
-  console.log("Generating 10,000 historical reading rows...");
-  const readingBatch: any[] = [];
-  const now = Date.now();
-  const dayMs = 24 * 60 * 60 * 1000;
-
-  for (let i = 1; i <= 10000; i++) {
-    const zoneId = zones[i % zones.length].id;
-    const pastTime = new Date(now - Math.floor(Math.random() * 30 * dayMs));
-    const isCritical = i % 100 === 0;
-    const isWarning = !isCritical && i % 20 === 0;
-
-    readingBatch.push({
-      zoneId,
-      seq: i,
-      flameRaw: isCritical ? 850 : 100,
-      gasRaw: isWarning ? 600 : 200,
-      waterRaw: isWarning ? 500 : 150,
-      motion: Math.random() > 0.5,
-      riskScore: isCritical ? 78.5 : isWarning ? 45.0 : 12.0,
-      state: isCritical ? "CRITICAL" : isWarning ? "WARNING" : "SAFE",
-      recordedAt: pastTime,
-      receivedAt: pastTime,
-    });
-
-    if (readingBatch.length >= 2000) {
-      await prisma.reading.createMany({
-        data: readingBatch,
-        skipDuplicates: true,
-      });
-      readingBatch.length = 0;
-    }
-  }
-
-  if (readingBatch.length > 0) {
-    await prisma.reading.createMany({
-      data: readingBatch,
-      skipDuplicates: true,
-    });
-  }
-
-  console.log("Successfully seeded 10,000+ readings!");
+  console.log("Core database seeding complete.");
 }
