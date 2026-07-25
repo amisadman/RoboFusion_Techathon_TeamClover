@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "author": "360 EDITZ",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 57.6, "left": -71.96, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": -78.1, "left": -9.8, "attrs": {} },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic1",
+      "top": -56.1,
+      "left": -426.5,
+      "attrs": { "distance": "400" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -70.8,
+      "left": -226.6,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": -70.8,
+      "left": -178.6,
+      "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led3",
+      "top": -70.8,
+      "left": -130.6,
+      "attrs": { "color": "red" }
+    },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": 12, "left": 78.6, "attrs": { "volume": "0.1" } },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": 221, "left": 76.8, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:GND.2", "pot1:GND", "black", [ "v-28.8", "h19.2" ] ],
+    [ "pot1:VCC", "esp:3V3", "red", [ "h-116", "v86.4" ] ],
+    [ "pot1:SIG", "esp:34", "green", [ "v-9.6", "h-115.6", "v134.4" ] ],
+    [ "ultrasonic1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "ultrasonic1:TRIG", "esp:26", "green", [ "v0" ] ],
+    [ "ultrasonic1:ECHO", "esp:27", "green", [ "v0" ] ],
+    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "relay1:VCC", "esp:3V3", "red", [ "h-28.8", "v-201.6", "h-163.2", "v48" ] ],
+    [ "relay1:GND", "esp:GND.2", "black", [ "h-9.6", "v-202", "h-48" ] ],
+    [ "bz1:1", "esp:GND.2", "green", [ "h-86.4" ] ],
+    [ "bz1:2", "esp:25", "green", [ "v0" ] ],
+    [ "relay1:IN", "esp:16", "green", [ "v-67.4", "h-57.6" ] ],
+    [ "led1:C", "esp:GND.1", "green", [ "v0" ] ],
+    [ "led2:C", "esp:GND.1", "green", [ "v0" ] ],
+    [ "led3:C", "esp:GND.1", "green", [ "v0" ] ],
+    [ "led1:A", "esp:4", "green", [ "v0" ] ],
+    [ "led2:A", "esp:13", "green", [ "v0" ] ],
+    [ "led3:A", "esp:14", "green", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
