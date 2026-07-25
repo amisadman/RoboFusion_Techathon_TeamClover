@@ -1,6 +1,6 @@
 # SCS-RG Test Case Completion & Code Verification Report
 
-This document provides a comprehensive audit of all completed test cases from the competition specification (`RoboFusion_1.0_SCS-RG_Round1_Case.pdf`), mapping each test case directly to its **file path**, **exact line numbers**, and **source code snippet**.
+This document provides a comprehensive audit of all completed test cases from the competition specification (`RoboFusion_1.0_SCS-RG_Round1_Case.pdf`), mapping each test case directly to its **relative repository path**, **exact line numbers**, and **source code snippet**.
 
 ---
 
@@ -21,7 +21,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 1. Test Case 6: Real-Time Ingestion & Risk Fusion (11 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/utils/riskFusion.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/utils/riskFusion.ts#L33-L70) (Lines 33–70)
+- **File**: [`backend/src/app/utils/riskFusion.ts`](../backend/src/app/utils/riskFusion.ts#L33-L70) (Lines 33–70)
 - **Code Snippet**:
   ```ts
   export function calculateRiskFusion(sensors: SensorReadings, debouncedFlame: boolean, isWarmUp: boolean): RiskFusionResult {
@@ -44,7 +44,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 2. Test Case 1–3: Debouncing, Linear Decay & Signal Conditioning
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/utils/debounce.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/utils/debounce.ts#L10-L48) (Lines 10–48)
+- **File**: [`backend/src/app/utils/debounce.ts`](../backend/src/app/utils/debounce.ts#L10-L48) (Lines 10–48)
 - **Code Snippet**:
   ```ts
   export function processDebounce(zoneId: string, flameRaw: number, currentScore: number) {
@@ -72,7 +72,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 3. Test Case 7: Alert Broadcast & Atomic Conflict Handling (8 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/modules/incidents/incidents.service.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/modules/incidents/incidents.service.ts#L70-L88) (Lines 70–88)
+- **File**: [`backend/src/app/modules/incidents/incidents.service.ts`](../backend/src/app/modules/incidents/incidents.service.ts#L70-L88) (Lines 70–88)
 - **Code Snippet**:
   ```ts
   export async function acknowledgeIncident(incidentId: string, userId: string) {
@@ -99,7 +99,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 4. Test Case 8: REST API Design (6 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/modules/zones/zones.router.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/modules/zones/zones.router.ts#L10-L24) (Lines 10–24)
+- **File**: [`backend/src/app/modules/zones/zones.router.ts`](../backend/src/app/modules/zones/zones.router.ts#L10-L24) (Lines 10–24)
 - **Code Snippet**:
   ```ts
   router.get("/zones", requireSession, handleGetZones);
@@ -112,7 +112,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 5. Test Case 9: Backend Resilience & Offline Health Monitoring (4 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/server.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/server.ts#L14-L67) (Lines 14–67) & [`backend/src/app/utils/offlineChecker.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/utils/offlineChecker.ts#L7-L40) (Lines 7–40)
+- **File**: [`backend/src/app/server.ts`](../backend/src/app/server.ts#L14-L67) (Lines 14–67) & [`backend/src/app/utils/offlineChecker.ts`](../backend/src/app/utils/offlineChecker.ts#L7-L40) (Lines 7–40)
 - **Code Snippet**:
   ```ts
   export async function startServer() {
@@ -126,7 +126,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 6. Test Case 10: Security & Authentication (3 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/middlewares/zoneAuth.middleware.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/middlewares/zoneAuth.middleware.ts#L7-L36) (Lines 7–36)
+- **File**: [`backend/src/app/middlewares/zoneAuth.middleware.ts`](../backend/src/app/middlewares/zoneAuth.middleware.ts#L7-L36) (Lines 7–36)
 - **Code Snippet**:
   ```ts
   export async function validateZoneKey(req: Request, res: Response, next: NextFunction) {
@@ -143,7 +143,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 7. Test Case 11: Scalability & Load Handling (3 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/scripts/phantom-zones.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/scripts/phantom-zones.ts#L10-L65) (Lines 10–65)
+- **File**: [`backend/scripts/phantom-zones.ts`](../backend/scripts/phantom-zones.ts#L10-L65) (Lines 10–65)
 - **Code Snippet**:
   ```ts
   // Load testing script creating 30+ simulated "phantom" zones and pushing continuous telemetry
@@ -154,7 +154,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 8. Test Case 13: Role-Based Access Control (RBAC) (6 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/middlewares/auth.middleware.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/middlewares/auth.middleware.ts#L22-L35) (Lines 22–35)
+- **File**: [`backend/src/app/middlewares/auth.middleware.ts`](../backend/src/app/middlewares/auth.middleware.ts#L22-L35) (Lines 22–35)
 - **Code Snippet**:
   ```ts
   export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
@@ -169,7 +169,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 9. Test Case 14: Incident Timeline & Reporting (5 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/modules/incidents/incidents.service.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/modules/incidents/incidents.service.ts#L50-L65) (Lines 50–65)
+- **File**: [`backend/src/app/modules/incidents/incidents.service.ts`](../backend/src/app/modules/incidents/incidents.service.ts#L50-L65) (Lines 50–65)
 - **Code Snippet**:
   ```ts
   export async function getIncidentById(incidentId: string) {
@@ -184,7 +184,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 10. Test Case 17–18: Schema Design & Data Integrity (12 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/prisma/schema.prisma`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/prisma/schema.prisma#L10-L105) (Lines 10–105)
+- **File**: [`backend/prisma/schema.prisma`](../backend/prisma/schema.prisma#L10-L105) (Lines 10–105)
 - **Code Snippet**:
   ```prisma
   model Reading {
@@ -201,7 +201,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 11. Test Case 19: Database Query Performance Optimization (4 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/prisma/schema.prisma`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/prisma/schema.prisma#L62-L95) (Lines 62 & 95) & [`backend/scripts/benchmark-queries.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/scripts/benchmark-queries.ts#L10-L45)
+- **File**: [`backend/prisma/schema.prisma`](../backend/prisma/schema.prisma#L62-L95) (Lines 62 & 95) & [`backend/scripts/benchmark-queries.ts`](../backend/scripts/benchmark-queries.ts#L10-L45)
 - **Code Snippet**:
   ```prisma
   @@index([status, openedAt]) // Composite index on Incident table for sub-millisecond range queries
@@ -212,7 +212,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 12. Test Case 20: Backup & Disaster Recovery (3 Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/scripts/backup.sh`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/scripts/backup.sh#L1-L20) & [`docs/backup-strategy.md`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/docs/backup-strategy.md#L1-L30)
+- **File**: [`backend/scripts/backup.sh`](../backend/scripts/backup.sh#L1-L20) & [`docs/backup-strategy.md`](docs/backup-strategy.md#L1-L30)
 - **Code Snippet**:
   ```bash
   pg_dump "$DATABASE_URL" > "${BACKUP_DIR}/scsrg_backup_${TIMESTAMP}.sql"
@@ -222,7 +222,7 @@ This document provides a comprehensive audit of all completed test cases from th
 
 ### 13. Test Case 21: Data Retention & Access Policy (1 Mark)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/utils/retentionJob.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/utils/retentionJob.ts#L10-L28) (Lines 10–28)
+- **File**: [`backend/src/app/utils/retentionJob.ts`](../backend/src/app/utils/retentionJob.ts#L10-L28) (Lines 10–28)
 - **Code Snippet**:
   ```ts
   export async function runDataRetentionPruning(retentionDays: number = 90) {
@@ -236,16 +236,16 @@ This document provides a comprehensive audit of all completed test cases from th
 ### 14. Test Case 27–30: Section F Documentation Deliverables (12 Marks)
 - **Status**: ✅ **COMPLETED**
 - **Files**:
-  - Architecture Diagram: [`docs/architecture.md`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/docs/architecture.md)
-  - ERD Diagram: [`docs/erd.md`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/docs/erd.md)
-  - Risk Formula Derivation: [`docs/risk-formula.md`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/docs/risk-formula.md)
-  - API Reference: [`docs/api.md`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/docs/api.md)
+  - Architecture Diagram: [`docs/architecture.md`](docs/architecture.md)
+  - ERD Diagram: [`docs/erd.md`](docs/erd.md)
+  - Risk Formula Derivation: [`docs/risk-formula.md`](docs/risk-formula.md)
+  - API Reference: [`docs/api.md`](docs/api.md)
 
 ---
 
 ### 15. Bonus Features 2, 3, 4 (30 Bonus Marks)
 - **Status**: ✅ **COMPLETED**
-- **File**: [`backend/src/app/modules/bonus/bonus.service.ts`](file:///d:/Coading/hackathon/RoboFusion_Techathon_TeamClover/backend/src/app/modules/bonus/bonus.service.ts#L10-L115) (Lines 10–115)
+- **File**: [`backend/src/app/modules/bonus/bonus.service.ts`](../backend/src/app/modules/bonus/bonus.service.ts#L10-L115) (Lines 10–115)
 - **Code Snippet**:
   - **Bonus 2**: `calculateZoneRiskTrend()` (Short-Term Risk Trend)
   - **Bonus 3**: `predictZoneRiskML()` (ML Logistic Regression Predictor isolated from actuation path)
