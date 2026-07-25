@@ -11,10 +11,10 @@ The overall Risk Fusion Score ($\text{RiskScore} \in [0.0, 100.0]$) is computed 
 $$\text{RiskScore} = w_{\text{fire}} \cdot S_{\text{fire}} + w_{\text{gas}} \cdot S_{\text{gas}} + w_{\text{water}} \cdot S_{\text{water}} + w_{\text{occ}} \cdot S_{\text{occ}}$$
 
 Where:
-- $S_{\text{fire}} = \min\left(1.0, \frac{\text{flame\_raw}}{1000.0}\right)$ (Normalized Flame Sensor ADC)
-- $S_{\text{gas}} = \min\left(1.0, \frac{\text{gas\_raw}}{1000.0}\right)$ (Normalized MQ-2 Gas Sensor ADC)
-- $S_{\text{water}} = \min\left(1.0, \frac{\text{water\_raw}}{1000.0}\right)$ (Normalized Water Sensor ADC)
-- $S_{\text{occ}} = 1.0 \text{ if motion == true else } 0.0$ (Occupancy Multiplier)
+- $S_{\text{fire}} = \min\left(1.0, \frac{\text{flame}_{\text{raw}}}{1000.0}\right)$ (Normalized Flame Sensor ADC)
+- $S_{\text{gas}} = \min\left(1.0, \frac{\text{gas}_{\text{raw}}}{1000.0}\right)$ (Normalized MQ-2 Gas Sensor ADC)
+- $S_{\text{water}} = \min\left(1.0, \frac{\text{water}_{\text{raw}}}{1000.0}\right)$ (Normalized Water Sensor ADC)
+- $S_{\text{occ}} = \begin{cases} 1.0 & \text{if motion is true} \\ 0.0 & \text{otherwise} \end{cases}$ (Occupancy Multiplier)
 
 ---
 
