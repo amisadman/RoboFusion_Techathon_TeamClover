@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: scsrg
+      POSTGRES_PASSWORD: scsrg
+      POSTGRES_DB: scsrg
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+# Recommended dev flow: `docker compose up postgres -d`, then run the
+# backend locally with `npm run dev` (tsx watch) pointed at this Postgres
+# via DATABASE_URL in .env. Rebuilding the backend image on every save is
+# too slow for iteration — the Dockerfile above is for deployment, not
+# hot-reload dev.
+
+volumes:
+  pgdata:

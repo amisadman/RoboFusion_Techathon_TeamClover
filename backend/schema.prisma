@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Run `npx @better-auth/cli generate` once src/lib/auth.ts is in place —
+// it appends User / Session / Account / Verification models below.
+// Do NOT hand-write those models; let Better Auth own them.
+
+model Zone {
+  id            String     @id // e.g. "iot_lab"
+  name          String
+  apiKey        String     @unique
+  hazardProfile String
+  archived      Boolean    @default(false)
+  lastSeenAt    DateTime?
+  sensors       Sensor[]
+  readings      Reading[]
+  incidents     Incident[]
+}
+
+model Sensor {
+  id     String @id @default(cuid())
+  zoneId String
+  zone   Zone   @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  type   String
+  unit   String
+}
+
+model Reading {
+  id         String   @id @default(cuid())
+  zoneId     String
+  zone       Zone     @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  seq        Int
+  flameRaw   Int
+  gasRaw     Int
+  waterRaw   Int
+  motion     Boolean
+  riskScore  Float
+  state      String
+  recordedAt DateTime // device clock (timestamp_ms from payload)
+  receivedAt DateTime @default(now()) // server clock
+
+  @@unique([zoneId, seq]) // DB-level dedup backstop for Test 6d
+  @@index([zoneId, receivedAt])
+}
+
+model Incident {
+  id            String   @id @default(cuid())
+  zoneId        String
+  zone          Zone     @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  status        String // OPEN | ACKED | RESOLVED
+  hazardTypes   String[]
+  peakRiskScore Float
+  source        String // sensor | manual_override | nl_report
+
+  openedAt       DateTime  @default(now())
+  acknowledgedBy String? // will FK to User.id once Better Auth models exist
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+
+  transitions IncidentTransition[]
+
+  @@index([status, openedAt]) // the single biggest win for Test 19
+}
+
+model IncidentTransition {
+  id         String   @id @default(cuid())
+  incidentId String
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  fromState  String?
+  toState    String
+  riskScore  Float
+  occurredAt DateTime @default(now())
+}
