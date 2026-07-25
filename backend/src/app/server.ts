@@ -4,6 +4,7 @@ import { initSocket } from "./config/socket.js";
 import { prisma } from "./config/prisma.js";
 import { updateZoneCacheItem } from "./modules/readings/readings.service.js";
 import { startOfflineCheckerInterval } from "./utils/offlineChecker.js";
+import { seedDatabase } from "./config/seed.js";
 
 const PORT = Number(process.env.PORT) || 4000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
@@ -15,6 +16,9 @@ const io = initSocket(server, FRONTEND_URL);
 async function performBootRecovery() {
   console.log("Starting backend boot recovery sequence...");
   try {
+    // Automatically seed core zones & default admin/staff users if missing
+    await seedDatabase();
+
     const activeZones = await prisma.zone.findMany({
       where: { archived: false },
       include: {
