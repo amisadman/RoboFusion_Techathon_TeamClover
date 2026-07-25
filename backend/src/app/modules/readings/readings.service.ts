@@ -1,7 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { ReadingPayload, ReadingResponseAccepted } from "../../types/contract.js";
 import { calculateRiskFusion } from "../../utils/riskFusion.js";
-import { processDebounce } from "../../utils/debounce.js";
+import { getFlameDebounceAndWarmup, applyDecay } from "../../utils/debounce.js";
 import {
   broadcastZoneState,
   broadcastPriorityUpdate,
@@ -85,17 +85,17 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     };
   }
 
-  // 2. Debounce and Warm-up evaluation
-  const { debouncedFlame, isWarmUp, finalScore } = processDebounce(
-    zone_id,
-    sensors.flame_raw,
-    cache.riskScore
-  );
+  // 2. Debounce and Warm-up evaluation (pure function of raw sensor values,
+  // doesn't need a score, so it can run before fusion)
+  const { debouncedFlame, isWarmUp } = getFlameDebounceAndWarmup(zone_id, sensors.flame_raw);
 
-  // 3. Compute Risk Fusion
+  // 3. Compute Risk Fusion for THIS cycle
   const fusion = calculateRiskFusion(sensors, debouncedFlame, isWarmUp);
-  const activeScore = Math.max(fusion.riskScore, finalScore);
-  
+
+  // 4. Apply decay smoothing to the FRESH fusion score (never a stale
+  // previously-stored score -- see docs/audit-findings.md F2)
+  const activeScore = applyDecay(zone_id, fusion.riskScore);
+
   let state = fusion.state;
   if (activeScore >= 65.0) state = "CRITICAL";
   else if (activeScore >= 30.0) state = "WARNING";

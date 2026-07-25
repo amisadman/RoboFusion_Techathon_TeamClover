@@ -25,14 +25,9 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Incident, IncidentFilters, IncidentStatus } from "@/types/contract";
 
-// types/contract.ts declares acknowledged_by_user as `string | null`, but
-// the live backend actually returns `{ id, name, email } | null` -- render
-// defensively for both until the contract is corrected.
 function acknowledgedByLabel(value: Incident["acknowledged_by_user"]): string {
   if (!value) return "—";
-  if (typeof value === "string") return value;
-  const user = value as unknown as { name?: string; email?: string };
-  return user.name || user.email || "—";
+  return value.name || value.email || "—";
 }
 
 function IncidentStatusBadge({ status }: { status: IncidentStatus }) {

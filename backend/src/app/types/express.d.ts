@@ -5,6 +5,8 @@ declare global {
     interface Request {
       user?: User & { role: string };
       session?: Session;
+      // Zone id resolved from a validated X-Zone-Key (zoneAuth.middleware.ts)
+      zoneId?: string;
     }
   }
 }

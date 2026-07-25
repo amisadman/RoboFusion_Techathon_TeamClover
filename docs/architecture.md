@@ -68,7 +68,7 @@ flowchart TD
 2. **Server-Side Risk Fusion**:
    - Calculates Risk Fusion Score ($0.0 - 100.0$) using weighted formula:
      $$\text{RiskScore} = w_{fire} \cdot S_{fire} + w_{gas} \cdot S_{gas} + w_{water} \cdot S_{water} + w_{occ} \cdot S_{occ}$$
-   - Applies N=5 debouncing, linear decay, and warm-up window evaluation.
+   - Applies N=3 debouncing, linear decay, and warm-up window evaluation.
 
 3. **Database Persistence & Incident State Machine**:
    - Saves raw reading to PostgreSQL `Reading` table.

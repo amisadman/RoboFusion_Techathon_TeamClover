@@ -48,9 +48,18 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
     api
       .getZones()
       .then((list) => {
-        const byId: Record<string, ZoneSummary> = {};
-        for (const z of list) byId[z.zone_id] = z;
-        setZones(byId);
+        // Merge, don't replace: a zone:state event can arrive (10Hz
+        // firmware sampling) before this REST call resolves, especially
+        // against a cold-started backend. Replacing wholesale here would
+        // silently clobber that fresher socket data with this snapshot's
+        // stale-by-comparison values. Existing (socket-derived) fields win;
+        // REST still supplies fields sockets never carry (name,
+        // hazard_profile) and seeds zones with no socket activity yet.
+        setZones((prev) => {
+          const merged: Record<string, ZoneSummary> = { ...prev };
+          for (const z of list) merged[z.zone_id] = { ...z, ...merged[z.zone_id] };
+          return merged;
+        });
       })
       .catch((err) => console.error("initial /api/zones fetch failed", err));
 

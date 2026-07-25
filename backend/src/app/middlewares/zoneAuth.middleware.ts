@@ -17,6 +17,7 @@ export async function validateZoneKey(req: Request, res: Response, next: NextFun
   }
 
   if (zoneKeyCache[zoneKey]) {
+    req.zoneId = zoneKeyCache[zoneKey];
     return next();
   }
 
@@ -35,6 +36,7 @@ export async function validateZoneKey(req: Request, res: Response, next: NextFun
 
   console.log(`✅ [ZoneAuth Success] Zone '${zone.id}' authenticated via key '${zoneKey}'`);
   zoneKeyCache[zoneKey] = zone.id;
+  req.zoneId = zone.id;
   next();
 }
 

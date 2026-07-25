@@ -21,7 +21,9 @@ export interface ZoneSummary {
   state: HazardState;
   risk_score: number;
   occupied: boolean;
-  last_seen_at: string;
+  // null for a zone that has never reported (Zone.lastSeenAt is nullable
+  // in the DB -- zones.service.ts passes null through as-is).
+  last_seen_at: string | null;
 }
 
 export interface IncidentTransition {
@@ -44,7 +46,10 @@ export interface Incident {
   source: IncidentSource;
   opened_at: string;
   acknowledged_by: string | null;
-  acknowledged_by_user: string | null;
+  // Actually a user object, not a string -- incidents.service.ts includes
+  // the full ackUser relation ({id, name, email}), not just an id/name
+  // string. See docs/audit-findings.md F7.
+  acknowledged_by_user: { id: string; name: string; email: string } | null;
   acknowledged_at: string | null;
   resolved_at: string | null;
   duration_seconds: number;

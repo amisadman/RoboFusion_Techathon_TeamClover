@@ -4,6 +4,22 @@ import { sendResponse } from "../../utils/sendResponse.js";
 
 export async function handlePostReading(req: Request, res: Response) {
   try {
+    // The X-Zone-Key only proves the caller holds SOME valid zone's key --
+    // without this check, a key copy-pasted onto the wrong device would
+    // silently authenticate as (and be able to mutate) a different zone's
+    // data. req.zoneId is set by validateZoneKey (zoneAuth.middleware.ts).
+    if (req.body.zone_id !== req.zoneId) {
+      console.warn(
+        `⚠️ [ZoneAuth Reject] X-Zone-Key belongs to '${req.zoneId}' but payload claims zone_id '${req.body.zone_id}'`
+      );
+      return sendResponse(res, 401, false, "X-Zone-Key does not match zone_id", {
+        accepted: false,
+        error: "unauthorized",
+        field: "zone_id",
+        detail: "X-Zone-Key does not match zone_id",
+      });
+    }
+
     const result = await processReading(req.body);
     console.log(`✅ [Readings Success] Ingested seq ${result.server_seq_ack} for zone '${req.body.zone_id}', state: ${result.state}, riskScore: ${result.risk_score}`);
     return sendResponse(res, 200, true, "Reading ingested successfully", result);

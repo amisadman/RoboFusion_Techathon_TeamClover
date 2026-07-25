@@ -31,29 +31,44 @@ Header: `X-Zone-Key: <per-zone api key>`
 - `*_raw` are raw ADC/sensor values. **The node never sends a risk score or a state.** Backend computes both (Test 6 condition).
 - `sensor_health` values: `"ok"` | `"disconnected"`. Drives OFFLINE (Test 4d, 23a).
 ### 4.2 Backend → zone node (the same HTTP response)
- 
+
+Wrapped in the same `{success, message, data}` envelope every other REST
+endpoint uses (`backend/src/app/utils/sendResponse.ts` applies it
+uniformly, including to `/api/readings`). All three zone-node firmware
+sketches parse this wrapped shape (`r["success"]`, then
+`r["data"]["accepted"]` / `r["data"]["commands"]`) -- this is not just the
+dashboard's shape, it's what the firmware itself expects too.
+
 ```json
 {
-  "accepted": true,
-  "state": "CRITICAL",
-  "risk_score": 78.4,
-  "commands": {
-    "led": "red",
-    "buzzer": true,
-    "relay_cutoff": true
-  },
-  "server_seq_ack": 1423
+  "success": true,
+  "message": "Reading ingested successfully",
+  "data": {
+    "accepted": true,
+    "state": "CRITICAL",
+    "risk_score": 78.4,
+    "commands": {
+      "led": "red",
+      "buzzer": true,
+      "relay_cutoff": true
+    },
+    "server_seq_ack": 1423
+  }
 }
 ```
  
-Rejection shape (HTTP 400):
+Rejection shape (HTTP 400), same envelope:
  
 ```json
 {
-  "accepted": false,
-  "error": "out_of_range",
-  "detail": "water_raw must be >= 0",
-  "field": "water_raw"
+  "success": false,
+  "message": "water_raw: water_raw must be >= 0",
+  "data": {
+    "accepted": false,
+    "error": "invalid_payload",
+    "detail": "water_raw must be >= 0",
+    "field": "water_raw"
+  }
 }
 ```
  
@@ -84,7 +99,7 @@ Firmware rule: **only `relay_cutoff` and `buzzer` fire on CRITICAL. WARNING is v
 | GET | `/api/incidents?from=&to=&zone_id=&status=` | session | Historical, date-range filterable (Test 8b) |
 | POST | `/api/incidents/:id/ack` | session | 404 if incident doesn't exist (Test 8c) |
 | POST | `/api/zones/:id/override` | **admin** | Manual override |
-| GET | `/api/health` | **admin** | System health |
+| GET | `/api/health` | public | System health |
 | ALL | `/api/auth/*` | — | Better Auth handler (mounted first, see §11) |
  
 ### 4.5 State enum
