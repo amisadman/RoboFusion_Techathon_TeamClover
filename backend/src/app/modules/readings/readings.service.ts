@@ -18,6 +18,7 @@ interface ZoneCacheItem {
   occupied: boolean;
   criticalStartedAt?: number;
   lastResponse?: ReadingResponseAccepted;
+  lastSeenAt?: number;
 }
 
 const zoneCache: Record<string, ZoneCacheItem> = {};
@@ -58,6 +59,7 @@ export function getPriorityQueue() {
 
 export async function processReading(payload: ReadingPayload): Promise<ReadingResponseAccepted> {
   const { zone_id, seq, timestamp_ms, sensors, sensor_health } = payload;
+  const nowMs = Date.now();
 
   const cache = zoneCache[zone_id] || {
     seq: -1,
@@ -65,6 +67,15 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     riskScore: 0,
     occupied: false,
   };
+
+  // Always refresh lastSeenAt on incoming valid HTTP request
+  cache.lastSeenAt = nowMs;
+
+  // Node reboot recovery: if node sequence resets to 1, reset sequence cache
+  if (seq === 1 && cache.seq > 1) {
+    console.log(`🔄 [Zone Node Reboot] Resetting sequence cache for zone '${zone_id}'`);
+    cache.seq = 0;
+  }
 
   // 1. Sequence deduplication check (Test 6d)
   if (seq <= cache.seq && cache.lastResponse) {
@@ -98,8 +109,8 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
   const criticalStartedAt =
     state === "CRITICAL"
       ? cache.state === "CRITICAL"
-        ? cache.criticalStartedAt || Date.now()
-        : Date.now()
+        ? cache.criticalStartedAt || nowMs
+        : nowMs
       : undefined;
 
   try {
@@ -225,6 +236,7 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     occupied: sensors.motion,
     criticalStartedAt,
     lastResponse: response,
+    lastSeenAt: nowMs,
   };
 
   broadcastZoneState({
