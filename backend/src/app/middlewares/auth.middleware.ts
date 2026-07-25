@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../config/auth.js";
 import { prisma } from "../config/prisma.js";
+import { sendResponse } from "../utils/sendResponse.js";
 
 export async function requireSession(req: Request, res: Response, next: NextFunction) {
   try {
@@ -10,10 +11,12 @@ export async function requireSession(req: Request, res: Response, next: NextFunc
     });
 
     if (!session || !session.user) {
-      return res.status(401).json({ error: "unauthorized", detail: "Valid session required" });
+      return sendResponse(res, 401, false, "Valid session required", {
+        error: "unauthorized",
+        field: "authorization",
+      });
     }
 
-    // Fetch full user to ensure role is populated
     const dbUser = await prisma.user.findUnique({
       where: { id: session.user.id },
     });
@@ -22,15 +25,21 @@ export async function requireSession(req: Request, res: Response, next: NextFunc
     req.session = session.session as any;
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Auth session error:", error);
-    return res.status(401).json({ error: "unauthorized", detail: "Session validation failed" });
+    return sendResponse(res, 401, false, "Session validation failed", {
+      error: "unauthorized",
+      detail: error.message,
+    });
   }
 }
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.user || req.user.role !== "admin") {
-    return res.status(403).json({ error: "forbidden", detail: "Admin role required" });
+    return sendResponse(res, 403, false, "Admin role required", {
+      error: "forbidden",
+      field: "role",
+    });
   }
   next();
 }

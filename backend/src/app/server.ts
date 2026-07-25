@@ -70,7 +70,7 @@ export async function startServer() {
   await performBootRecovery();
 
   server.listen(PORT, () => {
-    console.log(`🚀 SCS-RG Backend listening on port ${PORT}`);
+    console.log(` SCS-RG Backend listening on port ${PORT}`);
   });
 }
 

@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
 import { processReading } from "./readings.service.js";
+import { sendResponse } from "../../utils/sendResponse.js";
 
 export async function handlePostReading(req: Request, res: Response) {
   try {
-    const response = await processReading(req.body);
-    return res.json(response);
+    const result = await processReading(req.body);
+    return sendResponse(res, 200, true, "Reading ingested successfully", result);
   } catch (error: any) {
     console.error("Error processing reading:", error);
-    return res.status(400).json({
+    return sendResponse(res, 400, false, error.message || "Failed to process reading", {
       accepted: false,
       error: "server_error",
-      detail: error.message || "Failed to process reading",
       field: "payload",
     });
   }

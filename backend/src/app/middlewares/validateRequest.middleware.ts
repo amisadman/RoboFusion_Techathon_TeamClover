@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodSchema, ZodError } from "zod";
+import { sendResponse } from "../utils/sendResponse.js";
 
 export function validateBody(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -9,17 +10,16 @@ export function validateBody(schema: ZodSchema) {
     } catch (error: any) {
       if (error instanceof ZodError) {
         const firstIssue = error.issues[0];
-        return res.status(400).json({
+        const fieldName = firstIssue.path.join(".") || "body";
+        return sendResponse(res, 400, false, `${fieldName}: ${firstIssue.message}`, {
           accepted: false,
           error: "invalid_payload",
-          detail: `${firstIssue.path.join(".")}: ${firstIssue.message}`,
-          field: firstIssue.path.join(".") || "body",
+          field: fieldName,
         });
       }
-      return res.status(400).json({
+      return sendResponse(res, 400, false, "Malformed payload", {
         accepted: false,
         error: "invalid_payload",
-        detail: "Malformed payload",
         field: "body",
       });
     }

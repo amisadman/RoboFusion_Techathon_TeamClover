@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getHistoricalIncidents, acknowledgeIncident } from "./incidents.service.js";
+import { sendResponse } from "../../utils/sendResponse.js";
 
 export async function handleGetIncidents(req: Request, res: Response) {
   try {
@@ -12,9 +13,9 @@ export async function handleGetIncidents(req: Request, res: Response) {
       status: status as string,
     });
 
-    return res.json(incidents);
+    return sendResponse(res, 200, true, "Historical incidents retrieved successfully", incidents);
   } catch (error: any) {
-    return res.status(500).json({ error: "server_error", detail: error.message });
+    return sendResponse(res, 500, false, "Failed to retrieve historical incidents", { error: error.message });
   }
 }
 
@@ -26,14 +27,13 @@ export async function handleAckIncident(req: Request, res: Response) {
     const result = await acknowledgeIncident(id, userId);
 
     if (!result.success) {
-      return res.status(result.statusCode).json({
+      return sendResponse(res, result.statusCode, false, result.detail, {
         error: result.error,
-        detail: result.detail,
       });
     }
 
-    return res.json(result);
+    return sendResponse(res, 200, true, "Incident acknowledged successfully", result);
   } catch (error: any) {
-    return res.status(500).json({ error: "server_error", detail: error.message });
+    return sendResponse(res, 500, false, "Failed to acknowledge incident", { error: error.message });
   }
 }
