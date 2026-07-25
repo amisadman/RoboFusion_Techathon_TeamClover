@@ -3,7 +3,7 @@ import app from "./app.js";
 import { initSocket } from "./config/socket.js";
 import { prisma } from "./config/prisma.js";
 import { updateZoneCacheItem } from "./modules/readings/readings.service.js";
-import { startOfflineCheckerInterval } from "./utils/offlineChecker.js";
+// import { startOfflineCheckerInterval } from "./utils/offlineChecker.js";
 import { seedDatabase } from "./config/seed.js";
 
 const PORT = Number(process.env.PORT) || 4000;
@@ -73,7 +73,8 @@ async function performBootRecovery() {
 
 export async function startServer() {
   await performBootRecovery();
-  startOfflineCheckerInterval(5000);
+  // Offline checker interval disabled for frontend/Wokwi testing
+  // startOfflineCheckerInterval(5000);
 
   // Explicitly bind to "0.0.0.0" for Docker and cloud hosts like Render
   server.listen(PORT, "0.0.0.0", () => {
