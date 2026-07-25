@@ -6,7 +6,7 @@ interface ZoneDebounceState {
 }
 
 const zoneDebounceStore: Record<string, ZoneDebounceState> = {};
-const DEBOUNCE_THRESHOLD = 5; // N=5 consecutive readings (~1s)
+const DEBOUNCE_THRESHOLD = 3; // N=3 consecutive readings for fast Wokwi response
 
 export function getOrCreateDebounceState(zoneId: string): ZoneDebounceState {
   if (!zoneDebounceStore[zoneId]) {
@@ -31,8 +31,10 @@ export function processDebounce(
   // 1. Check 30-second gas warm-up window
   const isWarmUp = now - state.bootTimestamp < 30000;
 
-  // 2. Consecutive flame count check (flame_raw > 500 considered active flame)
-  const rawFlameActive = flameRaw > 500;
+  // 2. Dynamic threshold check: ESP32 12-bit ADC (>1500) vs Arduino 10-bit ADC (>400)
+  const threshold = flameRaw > 1023 ? 1500 : 400;
+  const rawFlameActive = flameRaw > threshold;
+
   if (rawFlameActive) {
     state.consecutiveFlameCount += 1;
   } else {
@@ -43,7 +45,7 @@ export function processDebounce(
   // 3. Linear decay on score drop (never snap instantly to 0)
   let finalScore = calculatedScore;
   if (calculatedScore < state.decayingScore) {
-    // Decay by ~5 points per reading (~1 second to decay 25 pts)
+    // Decay by ~5 points per reading
     state.decayingScore = Math.max(calculatedScore, state.decayingScore - 5.0);
     finalScore = state.decayingScore;
   } else {
