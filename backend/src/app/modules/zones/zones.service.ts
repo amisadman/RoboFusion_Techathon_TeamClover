@@ -35,6 +35,23 @@ export async function getAllZonesState() {
   });
 }
 
+export async function getZoneApiKey(zoneId: string) {
+  const zone = await prisma.zone.findUnique({
+    where: { id: zoneId },
+    select: { id: true, name: true, apiKey: true, archived: true },
+  });
+
+  if (!zone || zone.archived) {
+    throw new Error("Zone not found or archived");
+  }
+
+  return {
+    zone_id: zone.id,
+    name: zone.name,
+    api_key: zone.apiKey,
+  };
+}
+
 export async function applyAdminOverride(
   zoneId: string,
   targetState: "CRITICAL" | "SAFE",
