@@ -25,9 +25,9 @@ export interface FusionResult {
 
 const WEIGHTS = {
   fire: 40,
-  gas: 25,
-  water: 20,
-  occupancy: 15,
+  gas: 40,
+  water: 30,
+  occupancy: 25,
 };
 
 export function calculateRiskFusion(
@@ -40,25 +40,27 @@ export function calculateRiskFusion(
   const waterMaxAdc = sensors.water_raw > 1023 ? 4095.0 : 1023.0;
   const flameMaxAdc = sensors.flame_raw > 1023 ? 4095.0 : 1023.0;
 
-  // 1. Fire contribution (40 pts): binary 0 or 1 after debounce check + proportion
-  const fire_norm = debouncedFireSignal ? 1.0 : Math.min(1.0, sensors.flame_raw / flameMaxAdc * 0.5);
-  const fire_contrib = WEIGHTS.fire * (debouncedFireSignal ? 1.0 : (sensors.flame_raw > (flameMaxAdc * 0.4) ? 0.5 : 0.0));
+  // 1. Fire contribution (Max 40 pts): binary 1.0 after debounce or proportional
+  const fire_norm = debouncedFireSignal
+    ? 1.0
+    : (sensors.flame_raw > (flameMaxAdc * 0.4) ? 0.5 : Math.min(1.0, sensors.flame_raw / flameMaxAdc));
+  const fire_contrib = WEIGHTS.fire * fire_norm;
 
-  // 2. Gas contribution (25 pts): normalized 0.0 - 1.0. Zeroed during 30s warm-up
+  // 2. Gas contribution (Max 40 pts): normalized 0.0 - 1.0 (Zeroed during 30s warm-up)
   const raw_gas = Math.max(0, sensors.gas_raw);
   const gas_norm = isWarmUp ? 0.0 : Math.min(1.0, raw_gas / gasMaxAdc);
   const gas_contrib = WEIGHTS.gas * gas_norm;
 
-  // 3. Water level contribution (20 pts): normalized 0.0 - 1.0
+  // 3. Water level contribution (Max 30 pts): normalized 0.0 - 1.0
   const raw_water = Math.max(0, sensors.water_raw);
   const water_norm = Math.min(1.0, raw_water / waterMaxAdc);
   const water_contrib = WEIGHTS.water * water_norm;
 
-  // 4. Occupancy factor (15 pts): 1.0 if motion detected, 0.0 if empty
+  // 4. Occupancy factor (Max 25 pts): 1.0 if motion detected, 0.0 if empty
   const occ_norm = sensors.motion ? 1.0 : 0.0;
   const occ_contrib = WEIGHTS.occupancy * occ_norm;
 
-  // Total risk score capped at 100.0
+  // Total risk score hard capped at 100.0
   const totalScore = Number(
     Math.min(100.0, fire_contrib + gas_contrib + water_contrib + occ_contrib).toFixed(1)
   );
