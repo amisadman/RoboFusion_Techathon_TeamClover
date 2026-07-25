@@ -59,8 +59,41 @@ export async function getHistoricalIncidents(filters: IncidentFilterOptions) {
   }));
 }
 
+export async function getIncidentById(incidentId: string) {
+  const inc = await prisma.incident.findUnique({
+    where: { id: incidentId },
+    include: {
+      zone: { select: { name: true } },
+      ackUser: { select: { id: true, name: true, email: true } },
+      transitions: { orderBy: { occurredAt: "asc" } },
+    },
+  });
+
+  if (!inc) {
+    throw new Error("Incident not found");
+  }
+
+  return {
+    id: inc.id,
+    zone_id: inc.zoneId,
+    zone_name: inc.zone.name,
+    status: inc.status,
+    hazard_types: inc.hazardTypes,
+    peak_risk_score: inc.peakRiskScore,
+    source: inc.source,
+    opened_at: inc.openedAt.toISOString(),
+    acknowledged_by: inc.acknowledgedBy,
+    acknowledged_by_user: inc.ackUser,
+    acknowledged_at: inc.acknowledgedAt ? inc.acknowledgedAt.toISOString() : null,
+    resolved_at: inc.resolvedAt ? inc.resolvedAt.toISOString() : null,
+    duration_seconds: inc.resolvedAt
+      ? Math.floor((inc.resolvedAt.getTime() - inc.openedAt.getTime()) / 1000)
+      : Math.floor((Date.now() - inc.openedAt.getTime()) / 1000),
+    transitions: inc.transitions,
+  };
+}
+
 export async function acknowledgeIncident(incidentId: string, userId: string) {
-  // First Write Wins using updateMany (Test 7b & 8c)
   const now = new Date();
 
   const updateResult = await prisma.incident.updateMany({
@@ -76,7 +109,6 @@ export async function acknowledgeIncident(incidentId: string, userId: string) {
   });
 
   if (updateResult.count === 0) {
-    // Determine if incident doesn't exist or was already acknowledged
     const existing = await prisma.incident.findUnique({
       where: { id: incidentId },
     });
@@ -88,7 +120,6 @@ export async function acknowledgeIncident(incidentId: string, userId: string) {
     return { success: false, statusCode: 409, error: "already_acknowledged", detail: "Incident has already been acknowledged" };
   }
 
-  // Create transition timeline entry
   await prisma.incidentTransition.create({
     data: {
       incidentId,
@@ -99,7 +130,6 @@ export async function acknowledgeIncident(incidentId: string, userId: string) {
     },
   });
 
-  // Broadcast socket event
   broadcastIncidentAcked({
     incident_id: incidentId,
     acknowledged_by: userId,

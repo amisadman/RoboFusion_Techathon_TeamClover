@@ -39,6 +39,23 @@ export function updateZoneCacheItem(zoneId: string, item: Partial<ZoneCacheItem>
   };
 }
 
+export function getPriorityQueue() {
+  const criticalZones: CriticalZoneInfo[] = [];
+
+  Object.entries(zoneCache).forEach(([zoneId, item]) => {
+    if (item.state === "CRITICAL" && item.criticalStartedAt) {
+      criticalZones.push({
+        zone_id: zoneId,
+        risk_score: item.riskScore,
+        occupied: item.occupied,
+        criticalStartedAt: item.criticalStartedAt,
+      });
+    }
+  });
+
+  return rankCriticalZones(criticalZones);
+}
+
 export async function processReading(payload: ReadingPayload): Promise<ReadingResponseAccepted> {
   const { zone_id, seq, timestamp_ms, sensors, sensor_health } = payload;
 
@@ -66,7 +83,6 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
 
   // 3. Compute Risk Fusion
   const fusion = calculateRiskFusion(sensors, debouncedFlame, isWarmUp);
-  // Use finalScore from decay if it's higher than instantaneous fusion score
   const activeScore = Math.max(fusion.riskScore, finalScore);
   
   let state = fusion.state;
@@ -74,13 +90,11 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
   else if (activeScore >= 30.0) state = "WARNING";
   else state = "SAFE";
 
-  // Check if any sensor is disconnected
   const isDisconnected = Object.values(sensor_health).some((h) => h === "disconnected");
   if (isDisconnected) {
     state = "OFFLINE";
   }
 
-  // 4. Update in-memory zone state
   const criticalStartedAt =
     state === "CRITICAL"
       ? cache.state === "CRITICAL"
@@ -88,7 +102,6 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
         : Date.now()
       : undefined;
 
-  // 5. Database Persistence (Reading & Zone update)
   try {
     await prisma.reading.create({
       data: {
@@ -109,15 +122,12 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
       data: { lastSeenAt: new Date() },
     });
   } catch (error: any) {
-    // If DB unique constraint fires (seq duplicate retry), swallow or handle
     if (error?.code !== "P2002") {
       console.error("Failed to save reading:", error);
     }
   }
 
-  // 6. Incident Lifecycle Handling
   if (state === "CRITICAL") {
-    // Check if an OPEN or ACKED incident already exists for this zone
     const existingIncident = await prisma.incident.findFirst({
       where: {
         zoneId: zone_id,
@@ -126,7 +136,6 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     });
 
     if (!existingIncident) {
-      // Determine hazard types
       const hazards: string[] = [];
       if (debouncedFlame) hazards.push("fire");
       if (sensors.gas_raw > 400) hazards.push("gas");
@@ -157,14 +166,12 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
         risk_score: activeScore,
       });
     } else if (activeScore > existingIncident.peakRiskScore) {
-      // Update peak risk score if higher
       await prisma.incident.update({
         where: { id: existingIncident.id },
         data: { peakRiskScore: activeScore },
       });
     }
   } else if (state === "SAFE" && (cache.state === "CRITICAL" || cache.state === "WARNING")) {
-    // Recovery to SAFE -> resolve open incidents
     const activeIncident = await prisma.incident.findFirst({
       where: {
         zoneId: zone_id,
@@ -199,7 +206,6 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     }
   }
 
-  // 7. Update Cache
   const response: ReadingResponseAccepted = {
     accepted: true,
     state,
@@ -221,7 +227,6 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     lastResponse: response,
   };
 
-  // 8. Broadcast Socket Events
   broadcastZoneState({
     zone_id,
     state,
@@ -231,26 +236,12 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     updated_at: new Date().toISOString(),
   });
 
-  // Re-rank critical zones
   recalculateAndBroadcastPriority();
 
   return response;
 }
 
 export function recalculateAndBroadcastPriority() {
-  const criticalZones: CriticalZoneInfo[] = [];
-
-  Object.entries(zoneCache).forEach(([zoneId, item]) => {
-    if (item.state === "CRITICAL" && item.criticalStartedAt) {
-      criticalZones.push({
-        zone_id: zoneId,
-        risk_score: item.riskScore,
-        occupied: item.occupied,
-        criticalStartedAt: item.criticalStartedAt,
-      });
-    }
-  });
-
-  const ranked = rankCriticalZones(criticalZones);
+  const ranked = getPriorityQueue();
   broadcastPriorityUpdate({ ranked });
 }

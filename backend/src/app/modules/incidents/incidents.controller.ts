@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getHistoricalIncidents, acknowledgeIncident } from "./incidents.service.js";
+import { getHistoricalIncidents, getIncidentById, acknowledgeIncident } from "./incidents.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 
 export async function handleGetIncidents(req: Request, res: Response) {
@@ -16,6 +16,16 @@ export async function handleGetIncidents(req: Request, res: Response) {
     return sendResponse(res, 200, true, "Historical incidents retrieved successfully", incidents);
   } catch (error: any) {
     return sendResponse(res, 500, false, "Failed to retrieve historical incidents", { error: error.message });
+  }
+}
+
+export async function handleGetIncidentById(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const incident = await getIncidentById(id);
+    return sendResponse(res, 200, true, "Incident details retrieved successfully", incident);
+  } catch (error: any) {
+    return sendResponse(res, 404, false, error.message || "Incident not found", { error: "not_found" });
   }
 }
 

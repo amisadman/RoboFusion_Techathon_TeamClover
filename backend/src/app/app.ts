@@ -26,7 +26,6 @@ app.use(express.json());
 app.get("/", (_req, res) => {
   res.json({ status: "ok", message: "SCS-RG Backend Service Online", time: new Date().toISOString() });
 });
-app.get("/health", getHealth);
 
 // Register API Module Routers
 app.use("/api", healthRouter);

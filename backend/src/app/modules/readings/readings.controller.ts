@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { processReading } from "./readings.service.js";
+import { processReading, getPriorityQueue } from "./readings.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 
 export async function handlePostReading(req: Request, res: Response) {
@@ -13,5 +13,14 @@ export async function handlePostReading(req: Request, res: Response) {
       error: "server_error",
       field: "payload",
     });
+  }
+}
+
+export async function handleGetPriority(_req: Request, res: Response) {
+  try {
+    const priorityQueue = getPriorityQueue();
+    return sendResponse(res, 200, true, "Priority queue retrieved successfully", { ranked: priorityQueue });
+  } catch (error: any) {
+    return sendResponse(res, 500, false, "Failed to retrieve priority queue", { error: error.message });
   }
 }
