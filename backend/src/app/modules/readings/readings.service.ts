@@ -1,0 +1,256 @@
+import { prisma } from "../../config/prisma.js";
+import { ReadingPayload, ReadingResponseAccepted } from "../../types/contract.js";
+import { calculateRiskFusion } from "../../utils/riskFusion.js";
+import { processDebounce } from "../../utils/debounce.js";
+import {
+  broadcastZoneState,
+  broadcastPriorityUpdate,
+  broadcastIncidentOpened,
+  broadcastIncidentResolved,
+} from "../../config/socket.js";
+import { rankCriticalZones, CriticalZoneInfo } from "../../utils/priorityRanking.js";
+
+// In-memory zone state cache
+interface ZoneCacheItem {
+  seq: number;
+  state: "SAFE" | "WARNING" | "CRITICAL" | "OFFLINE";
+  riskScore: number;
+  occupied: boolean;
+  criticalStartedAt?: number;
+  lastResponse?: ReadingResponseAccepted;
+}
+
+const zoneCache: Record<string, ZoneCacheItem> = {};
+
+export function getZoneCache(): Record<string, ZoneCacheItem> {
+  return zoneCache;
+}
+
+export function updateZoneCacheItem(zoneId: string, item: Partial<ZoneCacheItem>) {
+  const current = zoneCache[zoneId] || {
+    seq: 0,
+    state: "SAFE",
+    riskScore: 0,
+    occupied: false,
+  };
+  zoneCache[zoneId] = {
+    ...current,
+    ...item,
+  };
+}
+
+export async function processReading(payload: ReadingPayload): Promise<ReadingResponseAccepted> {
+  const { zone_id, seq, timestamp_ms, sensors, sensor_health } = payload;
+
+  const cache = zoneCache[zone_id] || {
+    seq: -1,
+    state: "SAFE",
+    riskScore: 0,
+    occupied: false,
+  };
+
+  // 1. Sequence deduplication check (Test 6d)
+  if (seq <= cache.seq && cache.lastResponse) {
+    return {
+      ...cache.lastResponse,
+      server_seq_ack: seq,
+    };
+  }
+
+  // 2. Debounce and Warm-up evaluation
+  const { debouncedFlame, isWarmUp, finalScore } = processDebounce(
+    zone_id,
+    sensors.flame_raw,
+    cache.riskScore
+  );
+
+  // 3. Compute Risk Fusion
+  const fusion = calculateRiskFusion(sensors, debouncedFlame, isWarmUp);
+  // Use finalScore from decay if it's higher than instantaneous fusion score
+  const activeScore = Math.max(fusion.riskScore, finalScore);
+  
+  let state = fusion.state;
+  if (activeScore >= 65.0) state = "CRITICAL";
+  else if (activeScore >= 30.0) state = "WARNING";
+  else state = "SAFE";
+
+  // Check if any sensor is disconnected
+  const isDisconnected = Object.values(sensor_health).some((h) => h === "disconnected");
+  if (isDisconnected) {
+    state = "OFFLINE";
+  }
+
+  // 4. Update in-memory zone state
+  const criticalStartedAt =
+    state === "CRITICAL"
+      ? cache.state === "CRITICAL"
+        ? cache.criticalStartedAt || Date.now()
+        : Date.now()
+      : undefined;
+
+  // 5. Database Persistence (Reading & Zone update)
+  try {
+    await prisma.reading.create({
+      data: {
+        zoneId: zone_id,
+        seq,
+        flameRaw: sensors.flame_raw,
+        gasRaw: sensors.gas_raw,
+        waterRaw: sensors.water_raw,
+        motion: sensors.motion,
+        riskScore: activeScore,
+        state,
+        recordedAt: new Date(timestamp_ms),
+      },
+    });
+
+    await prisma.zone.update({
+      where: { id: zone_id },
+      data: { lastSeenAt: new Date() },
+    });
+  } catch (error: any) {
+    // If DB unique constraint fires (seq duplicate retry), swallow or handle
+    if (error?.code !== "P2002") {
+      console.error("Failed to save reading:", error);
+    }
+  }
+
+  // 6. Incident Lifecycle Handling
+  if (state === "CRITICAL") {
+    // Check if an OPEN or ACKED incident already exists for this zone
+    const existingIncident = await prisma.incident.findFirst({
+      where: {
+        zoneId: zone_id,
+        status: { in: ["OPEN", "ACKED"] },
+      },
+    });
+
+    if (!existingIncident) {
+      // Determine hazard types
+      const hazards: string[] = [];
+      if (debouncedFlame) hazards.push("fire");
+      if (sensors.gas_raw > 400) hazards.push("gas");
+      if (sensors.water_raw > 400) hazards.push("water");
+
+      const newIncident = await prisma.incident.create({
+        data: {
+          zoneId: zone_id,
+          status: "OPEN",
+          hazardTypes: hazards.length > 0 ? hazards : ["fire"],
+          peakRiskScore: activeScore,
+          source: "sensor",
+          transitions: {
+            create: {
+              fromState: cache.state,
+              toState: "CRITICAL",
+              riskScore: activeScore,
+            },
+          },
+        },
+      });
+
+      broadcastIncidentOpened({
+        incident_id: newIncident.id,
+        zone_id,
+        hazard_types: newIncident.hazardTypes,
+        opened_at: newIncident.openedAt.toISOString(),
+        risk_score: activeScore,
+      });
+    } else if (activeScore > existingIncident.peakRiskScore) {
+      // Update peak risk score if higher
+      await prisma.incident.update({
+        where: { id: existingIncident.id },
+        data: { peakRiskScore: activeScore },
+      });
+    }
+  } else if (state === "SAFE" && (cache.state === "CRITICAL" || cache.state === "WARNING")) {
+    // Recovery to SAFE -> resolve open incidents
+    const activeIncident = await prisma.incident.findFirst({
+      where: {
+        zoneId: zone_id,
+        status: { in: ["OPEN", "ACKED"] },
+      },
+    });
+
+    if (activeIncident) {
+      const resolvedAt = new Date();
+      await prisma.incident.update({
+        where: { id: activeIncident.id },
+        data: {
+          status: "RESOLVED",
+          resolvedAt,
+        },
+      });
+
+      await prisma.incidentTransition.create({
+        data: {
+          incidentId: activeIncident.id,
+          fromState: cache.state,
+          toState: "SAFE",
+          riskScore: activeScore,
+          occurredAt: resolvedAt,
+        },
+      });
+
+      broadcastIncidentResolved({
+        incident_id: activeIncident.id,
+        resolved_at: resolvedAt.toISOString(),
+      });
+    }
+  }
+
+  // 7. Update Cache
+  const response: ReadingResponseAccepted = {
+    accepted: true,
+    state,
+    risk_score: activeScore,
+    commands: {
+      led: state === "OFFLINE" ? "offline" : fusion.commands.led,
+      buzzer: state === "OFFLINE" ? false : fusion.commands.buzzer,
+      relay_cutoff: state === "OFFLINE" ? false : fusion.commands.relay_cutoff,
+    },
+    server_seq_ack: seq,
+  };
+
+  zoneCache[zone_id] = {
+    seq,
+    state,
+    riskScore: activeScore,
+    occupied: sensors.motion,
+    criticalStartedAt,
+    lastResponse: response,
+  };
+
+  // 8. Broadcast Socket Events
+  broadcastZoneState({
+    zone_id,
+    state,
+    risk_score: activeScore,
+    contributions: fusion.contributions,
+    occupied: sensors.motion,
+    updated_at: new Date().toISOString(),
+  });
+
+  // Re-rank critical zones
+  recalculateAndBroadcastPriority();
+
+  return response;
+}
+
+export function recalculateAndBroadcastPriority() {
+  const criticalZones: CriticalZoneInfo[] = [];
+
+  Object.entries(zoneCache).forEach(([zoneId, item]) => {
+    if (item.state === "CRITICAL" && item.criticalStartedAt) {
+      criticalZones.push({
+        zone_id: zoneId,
+        risk_score: item.riskScore,
+        occupied: item.occupied,
+        criticalStartedAt: item.criticalStartedAt,
+      });
+    }
+  });
+
+  const ranked = rankCriticalZones(criticalZones);
+  broadcastPriorityUpdate({ ranked });
+}
