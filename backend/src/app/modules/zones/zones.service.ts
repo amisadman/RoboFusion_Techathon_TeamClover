@@ -2,6 +2,8 @@ import { prisma } from "../../config/prisma.js";
 import { getZoneCache, updateZoneCacheItem, recalculateAndBroadcastPriority } from "../readings/readings.service.js";
 import { broadcastZoneState, broadcastIncidentOpened, broadcastIncidentResolved } from "../../config/socket.js";
 import { HazardState } from "../../types/contract.js";
+import { invalidateZoneKeyCache } from "../../middlewares/zoneAuth.middleware.js";
+import crypto from "crypto";
 
 export async function getAllZonesState() {
   const dbZones = await prisma.zone.findMany({
@@ -33,6 +35,49 @@ export async function getAllZonesState() {
       last_seen_at: z.lastSeenAt ? z.lastSeenAt.toISOString() : null,
     };
   });
+}
+
+export async function createZone(data: {
+  id: string;
+  name: string;
+  hazardProfile: string;
+  apiKey?: string;
+}) {
+  const existing = await prisma.zone.findUnique({
+    where: { id: data.id },
+  });
+
+  if (existing) {
+    throw new Error(`Zone with ID '${data.id}' already exists`);
+  }
+
+  const generatedKey = data.apiKey || `key_${data.id}_${crypto.randomBytes(4).toString("hex")}`;
+
+  const zone = await prisma.zone.create({
+    data: {
+      id: data.id,
+      name: data.name,
+      hazardProfile: data.hazardProfile,
+      apiKey: generatedKey,
+    },
+  });
+
+  // Initialize in-memory cache
+  updateZoneCacheItem(zone.id, {
+    seq: 0,
+    state: "SAFE",
+    riskScore: 0,
+    occupied: false,
+  });
+
+  invalidateZoneKeyCache();
+
+  return {
+    zone_id: zone.id,
+    name: zone.name,
+    hazard_profile: zone.hazardProfile,
+    api_key: zone.apiKey,
+  };
 }
 
 export async function getZoneApiKey(zoneId: string) {

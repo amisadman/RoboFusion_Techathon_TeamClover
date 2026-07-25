@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getAllZonesState, applyAdminOverride, getZoneApiKey } from "./zones.service.js";
+import { getAllZonesState, applyAdminOverride, getZoneApiKey, createZone } from "./zones.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 
 export async function handleGetZones(_req: Request, res: Response) {
@@ -8,6 +8,15 @@ export async function handleGetZones(_req: Request, res: Response) {
     return sendResponse(res, 200, true, "Zones retrieved successfully", zones);
   } catch (error: any) {
     return sendResponse(res, 500, false, "Failed to retrieve zones", { error: error.message });
+  }
+}
+
+export async function handleCreateZone(req: Request, res: Response) {
+  try {
+    const zone = await createZone(req.body);
+    return sendResponse(res, 201, true, "Zone created successfully", zone);
+  } catch (error: any) {
+    return sendResponse(res, 400, false, error.message || "Failed to create zone", { error: "create_failed" });
   }
 }
 
