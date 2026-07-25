@@ -5,9 +5,10 @@ import { sendResponse } from "../../utils/sendResponse.js";
 export async function handlePostReading(req: Request, res: Response) {
   try {
     const result = await processReading(req.body);
+    console.log(`✅ [Readings Success] Ingested seq ${result.server_seq_ack} for zone '${req.body.zone_id}', state: ${result.state}, riskScore: ${result.risk_score}`);
     return sendResponse(res, 200, true, "Reading ingested successfully", result);
   } catch (error: any) {
-    console.error("Error processing reading:", error);
+    console.error("❌ [Readings Error] Error processing reading:", error);
     return sendResponse(res, 400, false, error.message || "Failed to process reading", {
       accepted: false,
       error: "server_error",

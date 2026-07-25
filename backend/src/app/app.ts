@@ -4,7 +4,6 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./config/auth.js";
 
 import healthRouter from "./modules/health/health.router.js";
-import { getHealth } from "./modules/health/health.controller.js";
 import readingsRouter from "./modules/readings/readings.router.js";
 import zonesRouter from "./modules/zones/zones.router.js";
 import incidentsRouter from "./modules/incidents/incidents.router.js";
@@ -21,6 +20,16 @@ app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
+
+// Global HTTP Request Debug Logger (for Wokwi / ESP32 hardware troubleshooting)
+app.use((req, _res, next) => {
+  if (req.path.startsWith("/api/readings")) {
+    console.log(`\n📥 [HTTP ${req.method}] ${req.path}`);
+    console.log(`   Headers: X-Zone-Key='${req.headers["x-zone-key"] || "MISSING"}', Host='${req.headers["host"]}'`);
+    console.log(`   Body:`, JSON.stringify(req.body));
+  }
+  next();
+});
 
 // Direct Health Routes (supporting /, /health, and /api/health)
 app.get("/", (_req, res) => {

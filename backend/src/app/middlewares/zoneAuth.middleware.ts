@@ -8,6 +8,7 @@ export async function validateZoneKey(req: Request, res: Response, next: NextFun
   const zoneKey = req.headers["x-zone-key"] as string | undefined;
 
   if (!zoneKey) {
+    console.warn(`⚠️ [ZoneAuth Reject] Missing X-Zone-Key header from IP ${req.ip}`);
     return sendResponse(res, 401, false, "Missing X-Zone-Key header", {
       accepted: false,
       error: "unauthorized",
@@ -24,6 +25,7 @@ export async function validateZoneKey(req: Request, res: Response, next: NextFun
   });
 
   if (!zone || zone.archived) {
+    console.warn(`⚠️ [ZoneAuth Reject] Invalid/Archived X-Zone-Key '${zoneKey}' from IP ${req.ip}`);
     return sendResponse(res, 401, false, "Invalid or archived X-Zone-Key", {
       accepted: false,
       error: "unauthorized",
@@ -31,6 +33,7 @@ export async function validateZoneKey(req: Request, res: Response, next: NextFun
     });
   }
 
+  console.log(`✅ [ZoneAuth Success] Zone '${zone.id}' authenticated via key '${zoneKey}'`);
   zoneKeyCache[zoneKey] = zone.id;
   next();
 }

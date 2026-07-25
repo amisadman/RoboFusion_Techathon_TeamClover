@@ -11,12 +11,14 @@ export function validateBody(schema: ZodSchema) {
       if (error instanceof ZodError) {
         const firstIssue = error.issues[0];
         const fieldName = firstIssue.path.join(".") || "body";
+        console.error(`⚠️ [Validation Reject] ${req.path} -> ${fieldName}: ${firstIssue.message}`);
         return sendResponse(res, 400, false, `${fieldName}: ${firstIssue.message}`, {
           accepted: false,
           error: "invalid_payload",
           field: fieldName,
         });
       }
+      console.error(`⚠️ [Validation Reject] ${req.path} -> Malformed JSON payload`);
       return sendResponse(res, 400, false, "Malformed payload", {
         accepted: false,
         error: "invalid_payload",
