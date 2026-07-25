@@ -1,4 +1,5 @@
 import { prisma } from "../src/app/config/prisma.js";
+import { auth } from "../src/app/config/auth.js";
 
 async function main() {
   console.log("Seeding database...");
@@ -34,35 +35,60 @@ async function main() {
   }
   console.log("Seeded 3 core zones.");
 
-  // 2. Seed Default Users
-  await prisma.user.upsert({
-    where: { email: "admin@uftb.edu.bd" },
-    update: { role: "admin" },
-    create: {
-      id: "usr_admin_001",
-      name: "Campus Security Admin",
-      email: "admin@uftb.edu.bd",
-      emailVerified: true,
-      role: "admin",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
+  // 2. Seed Default Users with Passwords via Better Auth API
+  const DEFAULT_PASSWORD = "Password123!";
 
-  await prisma.user.upsert({
-    where: { email: "staff@uftb.edu.bd" },
-    update: { role: "staff" },
-    create: {
-      id: "usr_staff_001",
-      name: "Security Patrol Staff",
-      email: "staff@uftb.edu.bd",
-      emailVerified: true,
-      role: "staff",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  });
-  console.log("Seeded admin & staff users.");
+  // Seed Admin User
+  const existingAdmin = await prisma.user.findUnique({ where: { email: "admin@uftb.edu.bd" } });
+  if (!existingAdmin) {
+    try {
+      await auth.api.signUpEmail({
+        body: {
+          email: "admin@uftb.edu.bd",
+          password: DEFAULT_PASSWORD,
+          name: "Campus Security Admin",
+        },
+      });
+      await prisma.user.update({
+        where: { email: "admin@uftb.edu.bd" },
+        data: { role: "admin" },
+      });
+      console.log("Seeded Admin user (admin@uftb.edu.bd / Password123!)");
+    } catch (e: any) {
+      console.warn("Could not sign up admin:", e.message);
+    }
+  } else {
+    await prisma.user.update({
+      where: { email: "admin@uftb.edu.bd" },
+      data: { role: "admin" },
+    });
+  }
+
+  // Seed Staff User
+  const existingStaff = await prisma.user.findUnique({ where: { email: "staff@uftb.edu.bd" } });
+  if (!existingStaff) {
+    try {
+      await auth.api.signUpEmail({
+        body: {
+          email: "staff@uftb.edu.bd",
+          password: DEFAULT_PASSWORD,
+          name: "Security Patrol Staff",
+        },
+      });
+      await prisma.user.update({
+        where: { email: "staff@uftb.edu.bd" },
+        data: { role: "staff" },
+      });
+      console.log("Seeded Staff user (staff@uftb.edu.bd / Password123!)");
+    } catch (e: any) {
+      console.warn("Could not sign up staff:", e.message);
+    }
+  } else {
+    await prisma.user.update({
+      where: { email: "staff@uftb.edu.bd" },
+      data: { role: "staff" },
+    });
+  }
 
   // 3. Seed 10,000+ historical reading rows for Test 19
   console.log("Generating 10,000 historical reading rows...");
