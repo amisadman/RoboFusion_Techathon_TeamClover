@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/app/generated/prisma/client.js";
 
 const prisma = new PrismaClient();
 
@@ -37,7 +37,7 @@ async function main() {
   console.log("Seeded 3 core zones.");
 
   // 2. Seed Default Users
-  const adminUser = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: "admin@uftb.edu.bd" },
     update: { role: "admin" },
     create: {
