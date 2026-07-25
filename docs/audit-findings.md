@@ -489,19 +489,9 @@ these.
    move this to a platform-level cron (Render Cron Job) instead and
    remove the in-process interval.
 
-2. **F13 — `nl_report` as an `Incident.source` value is declared but
-   never produced.** `prisma/schema.prisma`'s comment and
-   `frontend/types/contract.ts`'s `IncidentSource` both list
-   `"nl_report"` as valid, but `parseNaturalLanguageReport()`
-   (`bonus.service.ts`) only parses and validates free text — it never
-   calls anything that creates an `Incident`. `docs/erd.md`'s two-value
-   enum (`sensor | manual_override`) is therefore **currently accurate**,
-   which contradicts the audit brief's assumption that erd.md needs a
-   third value added. Two ways to resolve this, and I didn't pick one:
-   (a) wire the NL-report endpoint through to real incident creation
-   (matching what the type already promises), or (b) trim the
-   aspirational third value from the schema comment and the frontend
-   type until the feature is actually built. Left both untouched.
+2. ~~**F13 — `nl_report` as an `Incident.source` value is declared but
+   never produced.**~~ **RESOLVED, see Part 2 below.** Decision was (a):
+   wire it through to real incident creation.
 
 3. **F14 — Can't verify `FRONTEND_URL` matches the deployed frontend
    from code alone.** Better Auth `trustedOrigins`, Express CORS, and
@@ -524,27 +514,9 @@ these.
    anywhere in this repo, so I can't confirm the pipeline handles either.
    Please verify with whatever tool actually produces the submitted PDF.
 
-5. **F16 — `riskFusion.ts`'s fire contribution has an undocumented extra
-   branch.**
-   ```ts
-   const fire_norm = debouncedFireSignal
-     ? 1.0
-     : (sensors.flame_raw > (flameMaxAdc * 0.4) ? 0.5 : Math.min(1.0, sensors.flame_raw / flameMaxAdc));
-   ```
-   `docs/risk-formula.md` specifies pure proportional scaling
-   (`min(1.0, flame_raw/MaxADC)`) or `1.0` once debounced — nothing in
-   between. This code adds a third case: once raw flame crosses 40% of
-   max ADC but *before* the N=3 debounce latches, it jumps straight to a
-   flat 0.5 (20 of the 40 fire points) instead of the proportional value.
-   Combined with occupancy (25 pts), that alone can reach 45 — into
-   WARNING territory — from a flicker that hasn't debounced yet, which is
-   in tension with TC1's "brief flicker below debounce = no trigger."
-   I didn't remove this, because it might be an intentional
-   Wokwi-demo-responsiveness tweak by a teammate rather than a typo, and
-   the audit brief asks me not to silently resolve shape/behavior
-   decisions. Recommend a human either confirms this was intentional (and
-   we document it in risk-formula.md) or approves removing it to match
-   the spec exactly.
+5. ~~**F16 — `riskFusion.ts`'s fire contribution has an undocumented extra
+   branch.**~~ **RESOLVED, see Part 2 below.** Decision was to remove the
+   branch and match `docs/risk-formula.md` exactly.
 
 ---
 
@@ -619,3 +591,119 @@ See per-finding "Applied directly" notes above. Summary:
 Not touched: F13, F14, F15, F16 (all under NEEDS A HUMAN CALL), and the
 two low-severity noted-only items (boot-recovery CRITICAL-forcing edge
 case; `robotics_lab` latent trap).
+
+---
+
+## Part 2 — Deferred decisions resolved + automated verification pass
+
+Follow-up pass: F16 and F13 were decided (see below) and implemented;
+then an automated verification suite
+(`backend/scripts/verify-fixes.ts`) was built and run against the
+**deployed** backend to confirm F1-F16 actually hold up over HTTP, not
+just in code review. Full pass-by-pass results:
+[docs/verification-results.md](verification-results.md).
+
+### F16 — RESOLVED: removed the undocumented flat-0.5 fire branch
+
+**Decision:** remove the branch; if a zone needs to reach CRITICAL
+faster for demo purposes, tune `DEBOUNCE_THRESHOLD` in `debounce.ts`
+instead (a documented, tunable parameter) rather than deviating from the
+formula itself.
+
+**Files changed:** `backend/src/app/utils/riskFusion.ts`. The fire
+contribution is now exactly:
+```ts
+const fire_norm = debouncedFireSignal ? 1.0 : Math.min(1.0, sensors.flame_raw / flameMaxAdc);
+```
+matching `docs/risk-formula.md` with no intermediate case. `N` (the
+debounce window) was left untouched at 3, per the instruction not to
+change the documented value as part of this fix.
+
+**Verified live:** confirmed via `verify-fixes.ts`'s F2 check after
+deployment — a single reading at `flame_raw:900` (proportional case, not
+yet debounced) now produces `fire_contrib ≈ 35.2` (`40 × 900/1023`), not
+the old branch's flat `20` (`40 × 0.5`). See
+`verification-results.md` for the exact before/after numbers that
+proved the old code was still live until redeployed.
+
+### F13 — RESOLVED: `nl_report` now creates real Incidents
+
+**Decision:** wire it through to real incident creation, under the hard
+constraint that it must never touch a zone's live `risk_score` or
+SAFE/WARNING/CRITICAL classification — see the constraint list in the
+follow-up brief, reproduced in code as a comment at the top of the
+BONUS 4 section.
+
+**Files changed:**
+- `backend/src/app/utils/hazardTypes.ts` (new) — single source of truth
+  for the hazard-type vocabulary (`"fire" | "gas" | "water"`), now
+  shared between sensor-triggered incidents (`readings.service.ts`) and
+  the NL-report path instead of being duplicated.
+- `backend/src/app/modules/bonus/bonus.service.ts` — `parseNaturalLanguageReport()`
+  is now a pure extraction function that returns `null` for `zone_id`/
+  `hazard_type` when it can't confidently resolve one (previously
+  silently defaulted unmatched text to `"iot_lab"`, and had an
+  unreachable `"robotics_lab"` branch for a zone that was never seeded —
+  see the "Other things checked" note above, now fixed rather than just
+  noted). A new `submitNaturalLanguageReport()` orchestrates: extract →
+  validate `zone_id` against a real non-archived `Zone` row → validate
+  `hazard_type` against `KNOWN_HAZARD_TYPES` → if either fails,
+  `validation_gate:"failed"`, no incident → if `estimated_severity` is
+  `"SAFE"`, no incident (nothing to act on) → otherwise reuse an existing
+  OPEN/ACKED incident for that zone if one exists (append hazard type,
+  bump `peakRiskScore` if higher — same flapping-prevention pattern
+  sensor-triggered incidents use) or open a new one, `source:"nl_report"`.
+- `backend/src/app/modules/bonus/bonus.controller.ts` — calls
+  `submitNaturalLanguageReport()` instead of the raw parser.
+- `frontend/types/contract.ts` — `NlReportResponse` updated to match:
+  `extracted_signal.zone_id`/`hazard_type` are now `string | null`, and
+  a new `incident_id: string | null` field was added (set when an
+  incident was created/updated, `null` for a failed gate or a SAFE
+  report). Nothing in the frontend UI consumes this endpoint yet, so
+  this is a safe, non-breaking type correction, not a shape change to
+  something already wired up.
+
+**Hard constraint verification:** confirmed by code review (the new
+code never imports/calls `updateZoneCacheItem`, `broadcastZoneState`, or
+writes to the `Zone` table) *and* by a live check: three real
+`POST /api/bonus/nl-report` calls were made against the deployed
+backend (one CRITICAL "fire" report for `server_room`, one unresolvable
+"robotics lab" report, one WARNING "gas" report for `data_science_lab`),
+then `GET /api/zones` was checked immediately after — both real zones'
+`state`/`risk_score` were byte-for-byte unchanged from before the
+reports, confirming the NL-report path cannot move a zone's live
+classification even for a CRITICAL-severity report. Full transcript in
+`verification-results.md`.
+
+**Priority queue tension, resolved:** the follow-up brief's constraint
+text says nl_report incidents should be "surfaced in the incident list
+and priority queue for staff attention," but the priority queue
+(`readings.service.ts`'s `getPriorityQueue()`) is deliberately driven
+only by `zoneCache` (sensor/risk-fusion state), which the hard
+constraint forbids this path from touching. I resolved this in favor of
+the hard constraint (it explicitly outranks "doing the feature at all"):
+nl_report incidents appear in the incident list
+(`GET /api/incidents`) and get a real-time `incident:opened` Socket.io
+broadcast (so connected dashboards see them immediately), but they do
+**not** appear in the risk-based priority *ranking* itself, since that
+would require deriving ranking from something other than live sensor
+state. Flagging this explicitly rather than silently picking a side.
+
+**Verified live:** `parseNaturalLanguageReport()`'s zone-resolution
+change also fixes the `robotics_lab` latent bug noted earlier in this
+document — confirmed live: a report mentioning "robotics" now returns
+`extracted_signal.zone_id: null` and `validation_gate:"failed"` instead
+of fabricating a non-existent zone.
+
+### Automated verification suite
+
+Built `backend/scripts/verify-fixes.ts` (`npm run verify:fixes`) and
+`backend/scripts/reset-demo.ts` (`npm run reset:demo`, new — see the
+final report for why this needed to be created). Full results,
+including one real bug this pass found and fixed
+(`backend/scripts/phantom-zones.ts`'s missing admin auth) and one
+significant live discovery (the deployed backend's actual
+`FRONTEND_URL` is a pre-existing Vercel deployment,
+`https://clover-scs-rg.vercel.app`, not the one separately deployed to
+`shah-samin-yasars-projects/frontend` earlier), are in
+[docs/verification-results.md](verification-results.md).

@@ -19,16 +19,14 @@ const BACKEND_URL = process.env.BACKEND_URL || "https://robofusion-techathon-tea
 // The origin this SCRIPT authenticates as -- separate from
 // DEPLOYED_FRONTEND_URL below. Empirically, Better Auth's CSRF origin
 // check on this deployment accepts the backend's own origin (same-origin
-// requests are implicitly trusted independent of trustedOrigins) but
-// rejected both the actual deployed Vercel frontend URL and
-// "http://localhost:3000" when tried as Origin during this run -- itself
-// live evidence for the F14 finding below, not just static-code doubt.
+// requests are implicitly trusted independent of trustedOrigins).
 const SCRIPT_AUTH_ORIGIN = BACKEND_URL;
 
 const DEPLOYED_FRONTEND_URL_SOURCE = process.env.DEPLOYED_FRONTEND_URL
   ? "env var DEPLOYED_FRONTEND_URL"
-  : "known deployment from this project (not a guess) -- override with DEPLOYED_FRONTEND_URL if stale";
-const DEPLOYED_FRONTEND_URL = process.env.DEPLOYED_FRONTEND_URL || "https://frontend-lac-seven-27.vercel.app";
+  : "confirmed live via this script's own F14 check (Access-Control-Allow-Origin reflected this " +
+    "value regardless of the Origin sent) -- not the separately-deployed frontend-lac-seven-27.vercel.app";
+const DEPLOYED_FRONTEND_URL = process.env.DEPLOYED_FRONTEND_URL || "https://clover-scs-rg.vercel.app";
 
 const ADMIN_EMAIL = "admin@uftb.edu.bd";
 const STAFF_EMAIL = "staff@uftb.edu.bd";

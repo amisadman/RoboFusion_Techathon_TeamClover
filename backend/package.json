@@ -9,7 +9,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "verify:fixes": "tsx scripts/verify-fixes.ts",
+    "reset:demo": "tsx scripts/reset-demo.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.0",
