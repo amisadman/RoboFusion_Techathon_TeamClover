@@ -138,10 +138,17 @@ export interface MlPredictResponse {
 export interface NlReportResponse {
   parsed: boolean;
   input_text: string;
+  // null when the parser couldn't confidently resolve a real zone / known
+  // hazard type -- validation_gate is "failed" in that case, and no
+  // incident is created. See docs/audit-findings.md F13.
   extracted_signal: {
-    zone_id: string;
-    hazard_type: string;
-    estimated_severity: HazardState;
+    zone_id: string | null;
+    hazard_type: string | null;
+    estimated_severity: "SAFE" | "WARNING" | "CRITICAL";
   };
   validation_gate: "passed" | "failed";
+  // Set only when validation passed AND estimated_severity was WARNING or
+  // CRITICAL (an open incident was created or an existing one updated).
+  // null for validation_gate:"failed" and for a "SAFE" report.
+  incident_id: string | null;
 }

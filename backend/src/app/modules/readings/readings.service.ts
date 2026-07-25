@@ -9,6 +9,7 @@ import {
   broadcastIncidentResolved,
 } from "../../config/socket.js";
 import { rankCriticalZones, CriticalZoneInfo } from "../../utils/priorityRanking.js";
+import { KNOWN_HAZARD_TYPES } from "../../utils/hazardTypes.js";
 
 // In-memory zone state cache
 interface ZoneCacheItem {
@@ -148,15 +149,15 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
 
     if (!existingIncident) {
       const hazards: string[] = [];
-      if (debouncedFlame) hazards.push("fire");
-      if (sensors.gas_raw > 400) hazards.push("gas");
-      if (sensors.water_raw > 400) hazards.push("water");
+      if (debouncedFlame) hazards.push(KNOWN_HAZARD_TYPES[0]); // "fire"
+      if (sensors.gas_raw > 400) hazards.push(KNOWN_HAZARD_TYPES[1]); // "gas"
+      if (sensors.water_raw > 400) hazards.push(KNOWN_HAZARD_TYPES[2]); // "water"
 
       const newIncident = await prisma.incident.create({
         data: {
           zoneId: zone_id,
           status: "OPEN",
-          hazardTypes: hazards.length > 0 ? hazards : ["fire"],
+          hazardTypes: hazards.length > 0 ? hazards : [KNOWN_HAZARD_TYPES[0]],
           peakRiskScore: activeScore,
           source: "sensor",
           transitions: {

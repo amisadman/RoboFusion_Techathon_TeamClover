@@ -40,10 +40,15 @@ export function calculateRiskFusion(
   const waterMaxAdc = sensors.water_raw > 1023 ? 4095.0 : 1023.0;
   const flameMaxAdc = sensors.flame_raw > 1023 ? 4095.0 : 1023.0;
 
-  // 1. Fire contribution (Max 40 pts): binary 1.0 after debounce or proportional
-  const fire_norm = debouncedFireSignal
-    ? 1.0
-    : (sensors.flame_raw > (flameMaxAdc * 0.4) ? 0.5 : Math.min(1.0, sensors.flame_raw / flameMaxAdc));
+  // 1. Fire contribution (Max 40 pts): binary 1.0 after debounce, otherwise
+  // pure proportional scaling -- matches docs/risk-formula.md exactly.
+  // (Previously had an undocumented flat-0.5 mid-branch for raw values
+  // above 40% of max ADC but not yet debounced -- removed, see
+  // docs/audit-findings.md F16. If a zone needs to reach CRITICAL faster
+  // for demo purposes, tune the debounce window (DEBOUNCE_THRESHOLD in
+  // debounce.ts) instead -- N is a documented, tunable parameter; this
+  // formula is not.)
+  const fire_norm = debouncedFireSignal ? 1.0 : Math.min(1.0, sensors.flame_raw / flameMaxAdc);
   const fire_contrib = WEIGHTS.fire * fire_norm;
 
   // 2. Gas contribution (Max 40 pts): normalized 0.0 - 1.0 (Zeroed during 30s warm-up)

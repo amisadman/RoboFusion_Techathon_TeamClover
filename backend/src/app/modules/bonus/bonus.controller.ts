@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   calculateRiskTrend,
   predictRiskProbability,
-  parseNaturalLanguageReport,
+  submitNaturalLanguageReport,
 } from "./bonus.service.js";
 import { sendResponse } from "../../utils/sendResponse.js";
 
@@ -29,7 +29,7 @@ export async function handleGetMLPrediction(req: Request, res: Response) {
 export async function handleNLReport(req: Request, res: Response) {
   try {
     const { text } = req.body;
-    const result = await parseNaturalLanguageReport(text);
+    const result = await submitNaturalLanguageReport(text);
     return sendResponse(res, 200, true, "Natural language report parsed successfully", result);
   } catch (error: any) {
     return sendResponse(res, 500, false, "Failed to parse natural language report", { error: error.message });
