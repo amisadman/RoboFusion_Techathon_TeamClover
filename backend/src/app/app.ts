@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./config/auth.js";
 
 import healthRouter from "./modules/health/health.router.js";
+import { getHealth } from "./modules/health/health.controller.js";
 import readingsRouter from "./modules/readings/readings.router.js";
 import zonesRouter from "./modules/zones/zones.router.js";
 import incidentsRouter from "./modules/incidents/incidents.router.js";
@@ -20,6 +21,12 @@ app.use(cors({ origin: FRONTEND_URL, credentials: true }));
 app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
+
+// Direct Health Routes (supporting /, /health, and /api/health)
+app.get("/", (_req, res) => {
+  res.json({ status: "ok", message: "SCS-RG Backend Service Online", time: new Date().toISOString() });
+});
+app.get("/health", getHealth);
 
 // Register API Module Routers
 app.use("/api", healthRouter);

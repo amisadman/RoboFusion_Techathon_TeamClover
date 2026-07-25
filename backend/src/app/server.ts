@@ -69,8 +69,9 @@ async function performBootRecovery() {
 export async function startServer() {
   await performBootRecovery();
 
-  server.listen(PORT, () => {
-    console.log(` SCS-RG Backend listening on port ${PORT}`);
+  // Explicitly bind to "0.0.0.0" for Docker and cloud hosts like Render
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 SCS-RG Backend listening on 0.0.0.0:${PORT}`);
   });
 }
 
