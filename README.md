@@ -13,13 +13,13 @@ Developed by **Team Clover**:
 
 ---
 
-## 📌 Project Overview & System Description
+## Project Overview & System Description
 
 **SCS-RG (Smart Campus Safety & Risk Grid)** is a production-grade, multi-hazard IoT emergency response and campus risk management platform. Built to safeguard critical campus infrastructure (such as server rooms, research laboratories, and data centers), SCS-RG combines real-time hardware telemetry ingestion, multi-hazard risk fusion, automated incident dispatching, predictive AI risk analysis, and dual-channel safety alerting.
 
-### 🌟 Key Capabilities & Architectural Highlights
+### Key Capabilities & Architectural Highlights
 - **Bounded Multi-Hazard Risk Fusion Engine**: Real-time evaluation of Flame, Gas, Water, and Occupancy signals ($w_{\text{fire}}=40, w_{\text{gas}}=40, w_{\text{water}}=30, w_{\text{occ}}=25$ capped at 100.0) with dynamic 12-bit ESP32 vs 10-bit Arduino ADC scaling and $N=3$ flame debounce filters.
-- **Atomic Priority Dispatch Queue**: Dynamic sorting of open incidents by $\text{peakRiskScore} \downarrow \rightarrow \text{occupied} \downarrow \rightarrow \text{seconds\_open} \downarrow$ with concurrency-safe single-write incident acknowledgments (`WHERE acknowledgedBy IS NULL`).
+- **Atomic Priority Dispatch Queue**: Dynamic sorting of open incidents by `peak_risk_score` (DESC) -> `occupied` (DESC) -> `seconds_open` (DESC) with concurrency-safe single-write incident acknowledgments (`WHERE acknowledgedBy IS NULL`).
 - **Short-Term Risk Trend Analyzer (Bonus 2)**: Rolling 5-reading slope calculation classifying zone trends into `RISING`, `FALLING`, or `STABLE`.
 - **Logistic Regression ML Risk Predictor (Bonus 3)**: Isolated advisory Sigmoid model ($P(\text{Critical}) = \frac{1}{1 + e^{-z}}$) estimating 5-minute failure probability without touching hardware actuation circuits.
 - **Natural-Language Incident Reporting Input (Bonus 4)**: Natural language parsing engine extracting structured hazard signals from free-text reports, validated against known campus zones and fed directly into the priority queue with source provenance tags (`"Sensor"`, `"Manual Override"`, `"NL Report"`).
@@ -27,7 +27,7 @@ Developed by **Team Clover**:
 
 ---
 
-## 📐 System Architecture Diagram
+## System Architecture Diagram
 
 ```mermaid
 flowchart TD
@@ -73,38 +73,15 @@ flowchart TD
 
 ---
 
-## 🗄️ Database Schema Design
+## Database Schema Design
 
 The SCS-RG backend uses PostgreSQL with Prisma ORM. Key entity relationships:
 
-```
-+-------------------+        +----------------------+        +-------------------------+
-|       Zone        |        |       Reading        |        |        Incident         |
-+-------------------+        +----------------------+        +-------------------------+
-| id (PK)           |1      *| id (PK)              |1      *| id (PK)                 |
-| name              |<-------| zoneId (FK)          |<-------| zoneId (FK)             |
-| hazardProfile     |        | seq                  |        | status (OPEN/ACK/RESOLV)|
-| apiKey            |        | riskScore            |        | hazardTypes (array)     |
-| state             |        | flameRaw, gasRaw...  |        | peakRiskScore           |
-| lastSeenAt        |        | receivedAt           |        | source (sensor/nl/override)
-+-------------------+        +----------------------+        | openedAt, acknowledgedAt|
-                                                             +-------------------------+
-                                                                          | 1
-                                                                          |
-                                                                          | *
-                                                             +-------------------------+
-                                                             |   IncidentTransition    |
-                                                             +-------------------------+
-                                                             | id (PK)                 |
-                                                             | incidentId (FK)         |
-                                                             | fromState, toState      |
-                                                             | riskScore, occurredAt   |
-                                                             +-------------------------+
-```
+![Database Schema](readme_resources/db_schema.png)
 
 ---
 
-## 🔌 Wokwi Hardware Simulations
+## Wokwi Hardware Simulations
 
 The hardware nodes simulate real ESP32 microcontrollers wired to analog Flame, Gas (MQ2), Water Level, and PIR Motion sensors:
 
@@ -119,7 +96,7 @@ The hardware nodes simulate real ESP32 microcontrollers wired to analog Flame, G
 
 ---
 
-## 🖥️ Web Dashboard UI Showcase
+## Web Dashboard UI Showcase
 
 ### 1. Live Command Dashboard (Dark Mode)
 ![Live Command Dashboard Dark Mode](readme_resources/ui_dashboard_dark.png)
@@ -141,7 +118,7 @@ The hardware nodes simulate real ESP32 microcontrollers wired to analog Flame, G
 
 ---
 
-## 📂 Repository Directory Structure
+## Repository Directory Structure
 
 ```
 RoboFusion_Techathon_TeamClover/
@@ -173,7 +150,7 @@ RoboFusion_Techathon_TeamClover/
 
 ---
 
-## 🚀 Setup & Local Execution Guide
+## Setup & Local Execution Guide
 
 ### Prerequisites
 - **Node.js**: v18.x or higher
@@ -228,7 +205,7 @@ npm run reset:demo
 
 ---
 
-## 🔗 Wokwi Online Simulation Links
+## Wokwi Online Simulation Links
 
 To run live hardware telemetry without physical microcontrollers:
 - **IoT Lab Node**: Open `firmware/iot_lab/diagram.json` in [Wokwi ESP32 Simulator](https://wokwi.com/)
