@@ -3,32 +3,88 @@
   "author": "360 EDITZ",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 57.6, "left": -81.56, "attrs": { "wifi": true } },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 57.6, "left": -71.96, "attrs": {} },
     { "type": "wokwi-potentiometer", "id": "pot1", "top": -78.1, "left": -9.8, "attrs": {} },
-    { "type": "wokwi-hc-sr04", "id": "ultrasonic1", "top": 59.1, "left": -455.3, "attrs": { "distance": 200 } },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "ultrasonic1",
+      "top": -84.9,
+      "left": 82.3,
+      "attrs": { "distance": "400" }
+    },
     {
       "type": "wokwi-led",
       "id": "led1",
-      "top": -70.8,
-      "left": -226.6,
+      "top": -13.2,
+      "left": -322.6,
       "attrs": { "color": "green" }
     },
     {
       "type": "wokwi-led",
       "id": "led2",
-      "top": -70.8,
-      "left": -178.6,
+      "top": 44.4,
+      "left": -322.6,
       "attrs": { "color": "yellow" }
     },
+    { "type": "wokwi-led", "id": "led3", "top": 102, "left": -322.6, "attrs": { "color": "red" } },
     {
-      "type": "wokwi-led",
-      "id": "led3",
-      "top": -70.8,
-      "left": -130.6,
-      "attrs": { "color": "red" }
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": -103.2,
+      "left": -190.2,
+      "attrs": { "volume": "0.1" }
     },
-    { "type": "wokwi-buzzer", "id": "bz1", "top": 12, "left": 78.6, "attrs": { "volume": "0.1" } },
-    { "type": "wokwi-relay-module", "id": "relay1", "top": 221, "left": 76.8, "attrs": {} }
+    { "type": "wokwi-relay-module", "id": "relay1", "top": 221, "left": 76.8, "attrs": {} },
+    { "type": "wokwi-text", "id": "text1", "top": 0, "left": -364.8, "attrs": { "text": "SAFE" } },
+    {
+      "type": "wokwi-text",
+      "id": "text2",
+      "top": 57.6,
+      "left": -393.6,
+      "attrs": { "text": "WARNING\n" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text3",
+      "top": 115.2,
+      "left": -393.6,
+      "attrs": { "text": "CRITICAL\n" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text4",
+      "top": -105.6,
+      "left": -19.2,
+      "attrs": { "text": "FIRE SENSOR" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text5",
+      "top": -105.6,
+      "left": 105.6,
+      "attrs": { "text": "WATER SENSOR\n" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text6",
+      "top": -124.8,
+      "left": -192,
+      "attrs": { "text": "BUZZER\n" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text7",
+      "top": 288,
+      "left": 134.4,
+      "attrs": { "text": "RELAY\n" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text8",
+      "top": -192,
+      "left": -28.8,
+      "attrs": { "text": "SERVER ROOM\n" }
+    }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
@@ -43,14 +99,14 @@
     [ "relay1:VCC", "esp:3V3", "red", [ "h-28.8", "v-201.6", "h-163.2", "v48" ] ],
     [ "relay1:GND", "esp:GND.2", "black", [ "h-9.6", "v-202", "h-48" ] ],
     [ "bz1:1", "esp:GND.2", "green", [ "h-86.4" ] ],
-    [ "bz1:2", "esp:25", "green", [ "v0" ] ],
+    [ "bz1:2", "esp:25", "green", [ "h57.05" ] ],
     [ "relay1:IN", "esp:16", "green", [ "v-67.4", "h-57.6" ] ],
-    [ "led1:C", "esp:GND.1", "green", [ "v0" ] ],
-    [ "led2:C", "esp:GND.1", "green", [ "v0" ] ],
-    [ "led3:C", "esp:GND.1", "green", [ "v0" ] ],
-    [ "led1:A", "esp:4", "green", [ "v0" ] ],
-    [ "led2:A", "esp:13", "green", [ "v0" ] ],
-    [ "led3:A", "esp:14", "green", [ "v0" ] ]
+    [ "led1:C", "esp:GND.1", "green", [ "h307.6", "v211.2" ] ],
+    [ "led2:C", "esp:GND.1", "green", [ "h96.4", "h211.05" ] ],
+    [ "led3:C", "esp:GND.1", "green", [ "h48.4", "h259.05" ] ],
+    [ "led1:A", "esp:4", "green", [ "h297.6", "v201.6" ] ],
+    [ "led2:A", "esp:13", "green", [ "h86.4", "h211.05" ] ],
+    [ "led3:A", "esp:14", "green", [ "h38.4", "h259.05" ] ]
   ],
   "dependencies": {}
 }
