@@ -87,12 +87,15 @@ The SCS-RG backend uses PostgreSQL with Prisma ORM. Key entity relationships:
 The hardware nodes simulate real ESP32 microcontrollers wired to analog Flame, Gas (MQ2), Water Level, and PIR Motion sensors:
 
 ### 1. IoT Lab Node Circuit Diagram
+- **Live Wokwi Simulation**: [https://wokwi.com/projects/470514529070990337](https://wokwi.com/projects/470514529070990337)
 ![IoT Lab Circuit Diagram](readme_resources/iot_lab.png)
 
 ### 2. Server Room Node Circuit Diagram
+- **Live Wokwi Simulation**: [https://wokwi.com/projects/470509081717871617](https://wokwi.com/projects/470509081717871617)
 ![Server Room Circuit Diagram](readme_resources/server_room.png)
 
 ### 3. Data Science Lab Node Circuit Diagram
+- **Live Wokwi Simulation**: [https://wokwi.com/projects/470523315735022593](https://wokwi.com/projects/470523315735022593)
 ![Data Science Lab Circuit Diagram](readme_resources/data_science_lab.png)
 
 ---
@@ -210,7 +213,7 @@ npm run reset:demo
 
 ## Wokwi Online Simulation Links
 
-To run live hardware telemetry without physical microcontrollers:
-- **IoT Lab Node**: Open `firmware/iot_lab/diagram.json` in [Wokwi ESP32 Simulator](https://wokwi.com/)
-- **Server Room Node**: Open `firmware/server_room/diagram.json` in [Wokwi ESP32 Simulator](https://wokwi.com/)
-- **Data Science Lab Node**: Open `firmware/data_science_lab/diagram.json` in [Wokwi ESP32 Simulator](https://wokwi.com/)
+To run live hardware telemetry without physical microcontrollers, access the interactive online Wokwi simulations:
+- **IoT Lab Node**: [https://wokwi.com/projects/470514529070990337](https://wokwi.com/projects/470514529070990337)
+- **Server Room Node**: [https://wokwi.com/projects/470509081717871617](https://wokwi.com/projects/470509081717871617)
+- **Data Science Lab Node**: [https://wokwi.com/projects/470523315735022593](https://wokwi.com/projects/470523315735022593)
