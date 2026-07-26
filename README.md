@@ -4,7 +4,7 @@ Developed by **Team Clover**:
 
 * **Live Web Dashboard URL:** [https://clover-scs-rg.vercel.app/](https://clover-scs-rg.vercel.app/)
 * **Production Live API Base URL:** [https://robofusion-techathon-teamclover.onrender.com](https://robofusion-techathon-teamclover.onrender.com)
-* **System Documentation (PDF):** [docs/system_documentation.pdf](docs/system_documentation.pdf) | [LaTeX Source](docs/system_documentation.tex)
+* **System Documentation (LaTeX Source):** [docs/system_documentation.tex](docs/system_documentation.tex)
 
 | Name | University | GitHub / Portfolio |
 | :--- | :--- | :--- |
