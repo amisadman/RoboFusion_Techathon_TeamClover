@@ -2,24 +2,18 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { WifiConnected02Icon, WifiDisconnected02Icon, Logout01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
+import {
+  WifiConnected02Icon,
+  WifiDisconnected02Icon,
+} from "@hugeicons/core-free-icons";
 import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRealtime } from "@/providers/realtime-provider";
-import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserMenu } from "../ui/userMenu";
 
 const NAV_LINKS = [
   { href: "/", label: "Dashboard" },
@@ -27,22 +21,16 @@ const NAV_LINKS = [
   { href: "/admin", label: "Admin" },
 ];
 
-function initials(name?: string | null) {
-  if (!name) return "";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const load = () => {
+      setMounted(true);
+    };
+
+    load();
   }, []);
 
   if (!mounted) {
@@ -70,10 +58,7 @@ function ThemeToggle() {
 
 export function TopBar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { connected, zones } = useRealtime();
-  const { data: session } = useSession();
-
   const zoneList = Object.values(zones);
   const criticalCount = zoneList.filter((z) => z.state === "CRITICAL").length;
   const summary =
@@ -83,9 +68,6 @@ export function TopBar() {
         ? `${zoneList.length} zones · ${criticalCount} critical`
         : `${zoneList.length} zones`;
 
-  const user = session?.user;
-  const role = (user as { role?: string } | undefined)?.role ?? "staff";
-
   return (
     <header className="sticky top-0 z-40 flex h-12 items-center gap-3 overflow-x-auto border-b border-hairline bg-surface px-4">
       <span className="shrink-0 font-heading text-sm font-bold tracking-widest whitespace-nowrap text-foreground">
@@ -94,7 +76,10 @@ export function TopBar() {
 
       <nav className="flex shrink-0 items-center gap-1" aria-label="Primary">
         {NAV_LINKS.map((link) => {
-          const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+          const active =
+            link.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(link.href);
           return (
             <Link
               key={link.href}
@@ -102,7 +87,9 @@ export function TopBar() {
               className={cn(
                 "rounded-sm px-2 py-1 font-heading text-xs font-medium tracking-wide transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
-                active ? "bg-secondary text-foreground" : "text-text-muted hover:text-foreground"
+                active
+                  ? "bg-secondary text-foreground"
+                  : "text-text-muted hover:text-foreground",
               )}
               aria-current={active ? "page" : undefined}
             >
@@ -112,12 +99,17 @@ export function TopBar() {
         })}
       </nav>
 
-      <span className="hidden shrink-0 font-mono text-xs whitespace-nowrap text-text-muted sm:inline">{summary}</span>
+      <span className="hidden shrink-0 font-mono text-xs whitespace-nowrap text-text-muted sm:inline">
+        {summary}
+      </span>
 
       <div className="ml-auto flex shrink-0 items-center gap-3">
         <span className="inline-flex items-center gap-1.5" role="status">
           <span
-            className={cn("inline-block size-1.5 rounded-full", connected ? "bg-safe" : "bg-offline")}
+            className={cn(
+              "inline-block size-1.5 rounded-full",
+              connected ? "bg-safe" : "bg-offline",
+            )}
             aria-hidden="true"
           />
           <HugeiconsIcon
@@ -125,43 +117,16 @@ export function TopBar() {
             strokeWidth={2}
             className={cn("size-3.5", connected ? "text-safe" : "text-offline")}
           />
-          <span className={cn("text-xs", connected ? "text-safe" : "text-offline")}>
+          <span
+            className={cn("text-xs", connected ? "text-safe" : "text-offline")}
+          >
             {connected ? "live" : "reconnecting"}
           </span>
         </span>
 
         <ThemeToggle />
 
-        {user && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className="flex cursor-pointer items-center gap-2 rounded-sm p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              aria-label="User menu"
-            >
-              <Avatar size="sm">
-                <AvatarFallback>
-                  {initials(user?.name || user?.email) || <HugeiconsIcon icon={UserAccountIcon} className="size-3.5" />}
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="flex flex-col gap-0.5">
-                <span className="font-medium text-foreground">{user?.name || user?.email || "User"}</span>
-                <span className="text-[0.625rem] uppercase tracking-wide text-text-muted">{role}</span>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={async () => {
-                  await signOut();
-                  router.replace("/login");
-                }}
-              >
-                <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <UserMenu />
       </div>
     </header>
   );

@@ -35,25 +35,35 @@ export default function DashboardPage() {
         <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_420px]">
           <section
             aria-label="Zone map"
-            className="min-w-0 border-b border-hairline lg:border-r lg:border-b-0"
+            className="min-w-0 border-b border-hairline lg:border-r lg:border-b-0 flex flex-col gap-5"
           >
             <ZoneMap zones={zones} />
+
+            <section
+              aria-label="Dashboard charts"
+              className="border-t border-hairline p-3"
+            >
+              <DashboardCharts />
+            </section>
           </section>
 
-          <section aria-label="Dispatch ledger" className="flex min-w-0 flex-col overflow-y-auto">
+          <section
+            aria-label="Dispatch ledger"
+            className="flex min-w-0 flex-col overflow-y-auto"
+          >
             <div className="border-b border-hairline bg-surface px-3 py-2">
               <h2 className="font-heading text-xs font-semibold tracking-widest text-text-muted uppercase">
                 Priority ranking
               </h2>
             </div>
-            <DispatchLedger ranked={priorityQueue} zones={zones} openIncidentsByZone={openIncidentsByZone} />
+            <DispatchLedger
+              ranked={priorityQueue}
+              zones={zones}
+              openIncidentsByZone={openIncidentsByZone}
+            />
             <NLReporter />
           </section>
         </div>
-
-        <section aria-label="Dashboard charts" className="border-t border-hairline p-3">
-          <DashboardCharts />
-        </section>
       </main>
     </div>
   );

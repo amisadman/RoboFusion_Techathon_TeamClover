@@ -2,7 +2,7 @@ import { HazardState } from "../types/contract.js";
 
 export interface SensorInputs {
   flame_raw: number; // 0 - 1023 (10-bit) or 0 - 4095 (12-bit ESP32)
-  gas_raw: number;   // 0 - 1023 (10-bit) or 0 - 4095 (12-bit ESP32)
+  gas_raw: number; // 0 - 1023 (10-bit) or 0 - 4095 (12-bit ESP32)
   water_raw: number; // 0 - 1023 (10-bit) or 0 - 4095 (12-bit ESP32)
   motion: boolean;
 }
@@ -30,16 +30,22 @@ export const RISK_THRESHOLDS = {
 };
 
 const WEIGHTS = {
-  fire: 40,
-  gas: 40,
+  fire: 65,
+  gas: 65,
   water: 30,
   occupancy: 25,
 };
+// const WEIGHTS = {
+//   fire: 40,
+//   gas: 40,
+//   water: 30,
+//   occupancy: 25,
+// };
 
 export function calculateRiskFusion(
   sensors: SensorInputs,
   debouncedFireSignal: boolean,
-  isWarmUp: boolean
+  isWarmUp: boolean,
 ): FusionResult {
   // Dynamically detect ADC resolution: 12-bit ESP32 (max 4095) vs 10-bit Arduino (max 1023)
   const gasMaxAdc = sensors.gas_raw > 1023 ? 4095.0 : 1023.0;
@@ -54,7 +60,9 @@ export function calculateRiskFusion(
   // for demo purposes, tune the debounce window (DEBOUNCE_THRESHOLD in
   // debounce.ts) instead -- N is a documented, tunable parameter; this
   // formula is not.)
-  const fire_norm = debouncedFireSignal ? 1.0 : Math.min(1.0, sensors.flame_raw / flameMaxAdc);
+  const fire_norm = debouncedFireSignal
+    ? 1.0
+    : Math.min(1.0, sensors.flame_raw / flameMaxAdc);
   const fire_contrib = WEIGHTS.fire * fire_norm;
 
   // 2. Gas contribution (Max 40 pts): normalized 0.0 - 1.0 (Zeroed during 30s warm-up)
@@ -73,7 +81,10 @@ export function calculateRiskFusion(
 
   // Total risk score hard capped at 100.0
   const totalScore = Number(
-    Math.min(100.0, fire_contrib + gas_contrib + water_contrib + occ_contrib).toFixed(1)
+    Math.min(
+      100.0,
+      fire_contrib + gas_contrib + water_contrib + occ_contrib,
+    ).toFixed(1),
   );
 
   // State classification
