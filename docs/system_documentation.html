@@ -37,12 +37,32 @@
   .authors {
     text-align: center;
     font-size: 10pt;
+    margin-bottom: 15px;
+  }
+  .team-table {
+    width: 90%;
+    margin: 10px auto 15px auto;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+  }
+  .team-table th, .team-table td {
+    border: 1px solid #d1d5db;
+    padding: 6px 10px;
+    text-align: left;
+  }
+  .team-table th {
+    background-color: #f3f4f6;
+  }
+  .links-block {
+    text-align: center;
+    font-size: 9.5pt;
     margin-bottom: 20px;
   }
   .abstract {
     background-color: #f8f9fa;
     border-left: 3px solid #003366;
-    padding: 10px 14px;
+    padding: 12px 16px;
+    margin-top: 15px;
     margin-bottom: 22px;
     font-style: italic;
     font-size: 10pt;
@@ -133,6 +153,22 @@
     color: #444;
     margin-bottom: 14px;
   }
+  .toc-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  .toc-list li {
+    margin-bottom: 8px;
+    font-size: 11pt;
+  }
+  .toc-list ul {
+    list-style-type: none;
+    padding-left: 20px;
+  }
+  .toc-list ul li {
+    font-size: 10pt;
+    margin-bottom: 4px;
+  }
   .page-break {
     page-break-before: always;
   }
@@ -144,22 +180,98 @@
 </head>
 <body>
 
+<!-- PAGE 1: TITLE, TEAM INFO, GITHUB REPO, ABSTRACT -->
 <h1 class="title">System Documentation</h1>
 <h2 class="subtitle">Smart Campus Safety & Risk Grid (SCS-RG)</h2>
 
 <div class="authors">
   <strong>Team Clover</strong><br>
-  Sadman Islam &nbsp;&bull;&nbsp; Shah Samin Yasar &nbsp;&bull;&nbsp; Ahmed Thousif Thisham<br>
-  <em>Metropolitan University</em><br>
-  Web Dashboard: <a href="https://clover-scs-rg.vercel.app/">https://clover-scs-rg.vercel.app/</a><br>
-  Backend API Base: <a href="https://robofusion-techathon-teamclover.onrender.com">https://robofusion-techathon-teamclover.onrender.com</a>
+  Department of Computer Science & Engineering, Metropolitan University
+</div>
+
+<table class="team-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>University</th>
+      <th>GitHub / Portfolio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Sadman Islam</strong></td>
+      <td>Metropolitan University</td>
+      <td><a href="https://github.com/amisadman">GitHub: amisadman</a></td>
+    </tr>
+    <tr>
+      <td><strong>Shah Samin Yasar</strong></td>
+      <td>Metropolitan University</td>
+      <td><a href="https://shahsaminyasar.vercel.app/">Portfolio: shahsaminyasar</a></td>
+    </tr>
+    <tr>
+      <td><strong>Ahmed Thousif Thisham</strong></td>
+      <td>Metropolitan University</td>
+      <td><a href="https://ahmedthousifportfolio.vercel.app/">Portfolio: ahmedthousif</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="links-block">
+  <strong>GitHub Repository:</strong> <a href="https://github.com/amisadman/RoboFusion_Techathon_TeamClover">https://github.com/amisadman/RoboFusion_Techathon_TeamClover</a><br>
+  <strong>Live Web Dashboard:</strong> <a href="https://clover-scs-rg.vercel.app/">https://clover-scs-rg.vercel.app/</a><br>
+  <strong>Production Live API Base:</strong> <a href="https://robofusion-techathon-teamclover.onrender.com">https://robofusion-techathon-teamclover.onrender.com</a>
 </div>
 
 <div class="abstract">
-  <strong>Abstract:</strong> This document serves as the complete <strong>System Documentation</strong> for the <strong>Smart Campus Safety & Risk Grid (SCS-RG)</strong>, covering all requirements of hackathon Test Cases 26&ndash;30. It provides full technical details including per-zone hardware circuit diagrams, software component architecture, complete REST API endpoint specifications with example HTTP payloads, database ER diagrams, and mathematically justified multi-hazard risk fusion formulas.
+  <strong>Abstract:</strong> This document serves as the complete <strong>System Documentation</strong> for the <strong>Smart Campus Safety & Risk Grid (SCS-RG)</strong>. Built for multi-hazard IoT emergency monitoring and campus safety management, SCS-RG integrates ESP32 hardware sensor nodes, a bounded multi-hazard risk fusion engine, real-time WebSocket state streaming, atomic incident priority dispatching, a predictive logistic regression model, and a natural-language incident parsing engine. This document details per-zone hardware circuit diagrams, software architecture specifications, database ER diagrams, mathematically justified risk fusion formulas, and complete REST API endpoint specifications with example payloads.
 </div>
 
-<h2 class="section-title">1. Software Architecture Overview</h2>
+<!-- PAGE 2: TABLE OF CONTENTS -->
+<div class="page-break"></div>
+
+<h2 class="section-title">Table of Contents</h2>
+<ul class="toc-list">
+  <li><strong>1. System Overview & Software Architecture</strong>
+    <ul>
+      <li>1.1 Architectural Layering</li>
+      <li>1.2 Software Architecture Diagram</li>
+    </ul>
+  </li>
+  <li><strong>2. Hardware Sensor Circuit Diagrams (Per Zone)</strong>
+    <ul>
+      <li>2.1 IoT Lab Node Circuit Diagram</li>
+      <li>2.2 Server Room Node Circuit Diagram</li>
+      <li>2.3 Data Science Lab Node Circuit Diagram</li>
+    </ul>
+  </li>
+  <li><strong>3. Mathematical Risk Calculation Formula & Weight Justifications</strong>
+    <ul>
+      <li>3.1 Mathematical Fusion Formula</li>
+      <li>3.2 Hazard Weight Justifications</li>
+      <li>3.3 Flame Debounce Filter (N=3 Cycles) & Decay Smoothing</li>
+      <li>3.4 Zone State Classification Thresholds</li>
+    </ul>
+  </li>
+  <li><strong>4. Database Schema & Entity-Relationship Diagram</strong>
+    <ul>
+      <li>4.1 Database Entity-Relationship (ER) Diagram</li>
+    </ul>
+  </li>
+  <li><strong>5. API Endpoints Reference with Example Requests & Responses</strong>
+    <ul>
+      <li>5.1 Telemetry Ingestion (POST /api/readings)</li>
+      <li>5.2 Get All Active Zones (GET /api/zones)</li>
+      <li>5.3 Priority Dispatch Queue (GET /api/priority)</li>
+      <li>5.4 Atomic Incident Acknowledgment (POST /api/incidents/:id/ack)</li>
+      <li>5.5 Natural Language Incident Reporting (POST /api/bonus/nl-report)</li>
+    </ul>
+  </li>
+</ul>
+
+<!-- PAGE 3+: MAIN DOCUMENTATION CONTENT -->
+<div class="page-break"></div>
+
+<h2 class="section-title">1. System Overview & Software Architecture</h2>
 <p>The SCS-RG system is engineered as a decoupled, multi-tiered campus safety grid comprising hardware sensor nodes, an Express/PostgreSQL backend processing engine, and a Next.js 16 command center web interface.</p>
 
 <h3 class="subsection-title">1.1 Architectural Layering</h3>
@@ -172,24 +284,26 @@
   <li><strong>Presentation Layer:</strong> Next.js 16 App Router interface featuring responsive dual-theme command console, live zone grid, dispatch ledger, and Recharts analytics.</li>
 </ul>
 
+<h3 class="subsection-title">1.2 Software Architecture Diagram</h3>
+<img src="../readme_resources/db_schema.png" class="diagram-img" alt="Architecture Diagram">
+<div class="caption">Figure 1: System Component Architecture & High-Level Layering</div>
+
 <h2 class="section-title">2. Hardware Sensor Circuit Diagrams (Per Zone)</h2>
 
 <h3 class="subsection-title">2.1 IoT Lab Node Circuit Diagram</h3>
 <p>Monitors soldering stations, chemical storage, and prototype hardware development. Wired with ESP32, IR Flame Sensor (Pin 34), MQ2 Gas Sensor (Pin 35), Water Level Sensor (Pin 32), PIR Motion Sensor (Pin 33), Status LED (Pin 2), Buzzer (Pin 25), and Emergency Relay Cutoff (Pin 26).</p>
 <img src="../readme_resources/iot_lab.png" class="diagram-img" alt="IoT Lab Circuit Diagram">
-<div class="caption">Figure 1: IoT Lab Hardware Sensor Node Circuit Diagram</div>
+<div class="caption">Figure 2: IoT Lab Hardware Sensor Node Circuit Diagram</div>
 
 <h3 class="subsection-title">2.2 Server Room Node Circuit Diagram</h3>
 <p>Monitors high-density server racks, power distribution units, and electrical switches. Optimized for electrical fire detection and cooling fluid leak monitoring.</p>
 <img src="../readme_resources/server_room.png" class="diagram-img" alt="Server Room Circuit Diagram">
-<div class="caption">Figure 2: Server Room Hardware Sensor Node Circuit Diagram</div>
-
-<div class="page-break"></div>
+<div class="caption">Figure 3: Server Room Hardware Sensor Node Circuit Diagram</div>
 
 <h3 class="subsection-title">2.3 Data Science Lab Node Circuit Diagram</h3>
 <p>Monitors high-performance computing clusters and student workstation clusters.</p>
 <img src="../readme_resources/data_science_lab.png" class="diagram-img" alt="Data Science Lab Circuit Diagram">
-<div class="caption">Figure 3: Data Science Lab Hardware Sensor Node Circuit Diagram</div>
+<div class="caption">Figure 4: Data Science Lab Hardware Sensor Node Circuit Diagram</div>
 
 <h2 class="section-title">3. Mathematical Risk Calculation Formula & Weight Justifications</h2>
 <p>The core safety engine evaluates overall zone risk using a <strong>Bounded Multi-Hazard Risk Fusion Engine</strong>. It computes a single scalar Risk Score R &isin; [0.0, 100.0].</p>
@@ -243,9 +357,7 @@
 <p>The persistence layer uses PostgreSQL managed via Prisma ORM. Below is the complete Entity-Relationship (ER) Diagram:</p>
 
 <img src="../readme_resources/db_schema.png" class="diagram-img" alt="Database ER Diagram">
-<div class="caption">Figure 4: PostgreSQL Database Entity-Relationship (ER) Diagram</div>
-
-<div class="page-break"></div>
+<div class="caption">Figure 5: PostgreSQL Database Entity-Relationship (ER) Diagram</div>
 
 <h2 class="section-title">5. API Endpoints Reference with Example Requests & Responses</h2>
 

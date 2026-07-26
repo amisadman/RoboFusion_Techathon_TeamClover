@@ -56,24 +56,42 @@
 \Large End-to-End System Specifications, Hardware Circuits, Software Architecture, API Reference, and Risk Fusion Engine}
 
 \author{\textbf{Team Clover}\\
-Sadman Islam \quad Shah Samin Yasar \quad Ahmed Thousif Thisham\\
-Metropolitan University\\
-\small Web Dashboard: \href{https://clover-scs-rg.vercel.app/}{https://clover-scs-rg.vercel.app/}\\
-\small Backend API Base: \href{https://robofusion-techathon-teamclover.onrender.com}{https://robofusion-techathon-teamclover.onrender.com}}
+Department of Computer Science \& Engineering, Metropolitan University\\
+\vspace{0.2cm}\\
+\begin{tabular}{l l l}
+\toprule
+\textbf{Name} & \textbf{University} & \textbf{GitHub / Portfolio} \\
+\midrule
+Sadman Islam & Metropolitan University & \href{https://github.com/amisadman}{GitHub: amisadman} \\
+Shah Samin Yasar & Metropolitan University & \href{https://shahsaminyasar.vercel.app/}{Portfolio: shahsaminyasar} \\
+Ahmed Thousif Thisham & Metropolitan University & \href{https://ahmedthousifportfolio.vercel.app/}{Portfolio: ahmedthousif} \\
+\bottomrule
+\end{tabular}\\
+\vspace{0.3cm}\\
+\small \textbf{GitHub Repository:} \href{https://github.com/amisadman/RoboFusion_Techathon_TeamClover}{https://github.com/amisadman/RoboFusion\_Techathon\_TeamClover}\\
+\small \textbf{Live Web Dashboard:} \href{https://clover-scs-rg.vercel.app/}{https://clover-scs-rg.vercel.app/}\\
+\small \textbf{Production Live API Base:} \href{https://robofusion-techathon-teamclover.onrender.com}{https://robofusion-techathon-teamclover.onrender.com}}
 
 \date{\today}
 
 \begin{document}
 
+% --- PAGE 1: TITLE, TEAM INFO, GITHUB REPO, ABSTRACT ---
 \maketitle
+\thispagestyle{empty}
 
 \begin{abstract}
-This document serves as the complete \textbf{System Documentation} for the \textbf{Smart Campus Safety \& Risk Grid (SCS-RG)}. Built for multi-hazard IoT emergency monitoring and campus safety management, SCS-RG integrates ESP32 hardware sensor nodes, a bounded multi-hazard risk fusion engine, real-time WebSocket state streaming, atomic incident priority dispatching, a predictive logistic regression model, and a natural-language incident parsing engine. This document provides full compliance with hackathon verification standards, detailing per-zone hardware circuit diagrams, software architecture specifications, database ER diagrams, mathematically justified risk fusion formulas, and complete REST API endpoint specifications with example payloads.
+This document serves as the complete \textbf{System Documentation} for the \textbf{Smart Campus Safety \& Risk Grid (SCS-RG)}. Built for multi-hazard IoT emergency monitoring and campus safety management, SCS-RG integrates ESP32 hardware sensor nodes, a bounded multi-hazard risk fusion engine, real-time WebSocket state streaming, atomic incident priority dispatching, a predictive logistic regression model, and a natural-language incident parsing engine. This document details per-zone hardware circuit diagrams, software architecture specifications, database ER diagrams, mathematically justified risk fusion formulas, and complete REST API endpoint specifications with example payloads.
 \end{abstract}
 
+\newpage
+
+% --- PAGE 2: TABLE OF CONTENTS ---
+\thispagestyle{plain}
 \tableofcontents
 \newpage
 
+% --- PAGE 3+: MAIN DOCUMENTATION CONTENT STARTS ---
 \section{System Overview \& Software Architecture}
 
 The SCS-RG system is engineered as a decoupled, multi-tiered campus safety grid comprising hardware sensor nodes, an Express/PostgreSQL backend processing engine, and a Next.js 16 command center web interface.
