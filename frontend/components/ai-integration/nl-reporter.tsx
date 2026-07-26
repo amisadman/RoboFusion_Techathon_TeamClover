@@ -3,16 +3,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Microphone01Icon,
-  MicrophoneOff01Icon,
-  AiMind01Icon,
-  Send01Icon,
+  Mic01Icon,
+  MicOff01Icon,
+  AiBrain01Icon,
+  SentIcon,
   RefreshIcon,
   AlertCircleIcon,
   CheckmarkCircle02Icon,
   InformationCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { api, ApiError } from "@/lib/api";
+import type { NlReportResponse } from "@/types/contract";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,7 +46,7 @@ export function NLReporter() {
   const [stage, setStage] = useState<Stage>("idle");
   const [geminiParseResult, setGeminiParseResult] = useState<GeminiParseResult | null>(null);
   const [validation, setValidation] = useState<ReturnType<typeof validateExtractedSignal> | null>(null);
-  const [backendResult, setBackendResult] = useState<unknown>(null);
+  const [backendResult, setBackendResult] = useState<NlReportResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [knownZones, setKnownZones] = useState<KnownZone[]>([]);
@@ -56,7 +57,7 @@ export function NLReporter() {
 
   useEffect(() => {
     api.getZones().then((zones) => {
-      setKnownZones(zones.map((z: { id: string; name: string }) => ({ id: z.id, name: z.name })));
+      setKnownZones(zones.map((z) => ({ id: z.zone_id, name: z.name })));
       setZonesLoaded(true);
     }).catch(() => {});
   }, []);
@@ -234,7 +235,7 @@ export function NLReporter() {
                 onClick={isListening ? stopListening : startListening}
               >
                 <HugeiconsIcon
-                  icon={isListening ? MicrophoneOff01Icon : Microphone01Icon}
+                  icon={isListening ? MicOff01Icon : Mic01Icon}
                 />
               </Button>
             )}
@@ -263,13 +264,13 @@ export function NLReporter() {
               </>
             ) : (
               <>
-                <HugeiconsIcon icon={AiMind01Icon} />
+                <HugeiconsIcon icon={AiBrain01Icon} />
                 Parse with AI
               </>
             )}
           </Button>
 
-          {stage === "ready" && (
+          {(stage === "ready" || stage === "submitting") && (
             <Button
               size="sm"
               variant="destructive"
@@ -283,7 +284,7 @@ export function NLReporter() {
                 </>
               ) : (
                 <>
-                  <HugeiconsIcon icon={Send01Icon} />
+                  <HugeiconsIcon icon={SentIcon} />
                   Submit Report
                 </>
               )}
@@ -395,11 +396,11 @@ export function NLReporter() {
             </div>
             <p className="text-[0.625rem] text-text-muted">
               Backend validation gate: <span className="font-medium text-foreground">
-                {(backendResult as { validation_gate?: string }).validation_gate}
+                {backendResult.validation_gate}
               </span>
-              {(backendResult as { incident_id?: string | null }).incident_id && (
+              {backendResult.incident_id && (
                 <> &middot; Incident ID: <span className="font-mono text-foreground">
-                  {(backendResult as { incident_id: string }).incident_id.slice(0, 8)}...
+                  {backendResult.incident_id.slice(0, 8)}...
                 </span></>
               )}
             </p>
