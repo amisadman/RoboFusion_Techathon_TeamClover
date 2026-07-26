@@ -16,6 +16,13 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{needspace}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\setstretch{1.2}
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Smart Campus Safety \& Risk Grid}\fancyhead[R]{System Documentation}\fancyfoot[C]{\thepage}
 
 % Configure graphicspath so images resolve on Overleaf (root upload) and locally
 \graphicspath{{../readme_resources/}{readme_resources/}{images/}{./}}
@@ -51,37 +58,67 @@
     samepage=true
 }
 
-\title{\textbf{\Large System Documentation: Smart Campus Safety \& Risk Grid (SCS-RG)}\\
-\vspace{0.2cm}
-\Large End-to-End System Specifications, Hardware Circuits, Software Architecture, API Reference, and Risk Fusion Engine}
-
-\author{\textbf{Team Clover}\\
-\vspace{0.15cm}
-\href{https://github.com/amisadman}{Sadman Islam} \quad \href{https://shahsaminyasar.vercel.app/}{Shah Samin Yasar} \quad \href{https://ahmedthousifportfolio.vercel.app/}{Ahmed Thousif Thisham}\\
-Metropolitan University\\
-\vspace{0.2cm}
-\small \textbf{GitHub Repo:} \href{https://github.com/amisadman/RoboFusion_Techathon_TeamClover}{https://github.com/amisadman/RoboFusion\_Techathon\_TeamClover}\\
-\small \textbf{Web Dashboard:} \href{https://clover-scs-rg.vercel.app/}{https://clover-scs-rg.vercel.app/}\\
-\small \textbf{Backend API Base:} \href{https://robofusion-techathon-teamclover.onrender.com}{https://robofusion-techathon-teamclover.onrender.com}}
-
-\date{\today}
+\title{}\author{}\date{}
 
 \begin{document}
 
-% --- PAGE 1: TITLE, CLICKABLE AUTHORS, LINKS, ABSTRACT ---
-\maketitle
-\thispagestyle{empty}
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries Smart Campus Safety \& Risk Grid (SCS-RG)\par}
+\vspace{0.5cm}
+{\Large System Documentation\par}
+\vspace{0.3cm}
+{\large Hardware Design • Software Architecture • API Reference • Risk Fusion Engine\par}
+\vfill
+{\Large\textbf{Team Clover}\par}
+Sadman Islam\\Shah Samin Yasar\\Ahmed Thousif Thisham
 
-\begin{abstract}
-This document serves as the complete \textbf{System Documentation} for the \textbf{Smart Campus Safety \& Risk Grid (SCS-RG)}. Built for multi-hazard IoT emergency monitoring and campus safety management, SCS-RG integrates ESP32 hardware sensor nodes, a bounded multi-hazard risk fusion engine, real-time WebSocket state streaming, atomic incident priority dispatching, a predictive logistic regression model, and a natural-language incident parsing engine. This document details per-zone hardware circuit diagrams, software architecture specifications, database ER diagrams, mathematically justified risk fusion formulas, and complete REST API endpoint specifications with example payloads.
-\end{abstract}
+\vspace{0.8cm}
+Metropolitan University
+
+\vfill
+
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabular}{rl}
+\textbf{GitHub Repository:} &
+\href{https://github.com/amisadman/RoboFusion_Techathon_TeamClover}{github.com/amisadman/RoboFusion\_Techathon\_TeamClover} \\
+
+\textbf{Frontend Dashboard:} &
+\href{https://clover-scs-rg.vercel.app/}{clover-scs-rg.vercel.app} \\
+
+\textbf{Backend API:} &
+\href{https://robofusion-techathon-teamclover.onrender.com}{robofusion-techathon-teamclover.onrender.com} \\
+
+\textbf{IoT Lab Wokwi:} &
+\href{https://wokwi.com/projects/470514529070990337}{wokwi.com/projects/470514529070990337} \\
+
+\textbf{Server Room Wokwi:} &
+\href{https://wokwi.com/projects/470509081717871617}{wokwi.com/projects/470509081717871617} \\
+
+\textbf{Data Science Lab Wokwi:} &
+\href{https://wokwi.com/projects/470523315735022593}{wokwi.com/projects/470523315735022593}
+\end{tabular}
+\end{center}
+
+\vfill
+\today
+\end{titlepage}
+
+
+% --- PAGE 1: TITLE, CLICKABLE AUTHORS, LINKS, ABSTRACT ---
+
+\thispagestyle{empty}
 
 \newpage
 
 % --- PAGE 2: TABLE OF CONTENTS ---
 \thispagestyle{plain}
 \tableofcontents
-\newpage
+\newpage\section*{Abstract}\large
+This document serves as the complete \textbf{System Documentation} for the \textbf{Smart Campus Safety \& Risk Grid (SCS-RG)}. Built for multi-hazard IoT emergency monitoring and campus safety management, SCS-RG integrates ESP32 hardware sensor nodes, a bounded multi-hazard risk fusion engine, real-time WebSocket state streaming, atomic incident priority dispatching, a predictive logistic regression model, and a natural-language incident parsing engine. This document details per-zone hardware circuit diagrams, software architecture specifications, database ER diagrams, mathematically justified risk fusion formulas, and complete REST API endpoint specifications with example payloads.
+\normalsize
 
 % --- PAGE 3+: MAIN DOCUMENTATION CONTENT STARTS ---
 \section{System Overview \& Software Architecture}
@@ -101,7 +138,7 @@ The SCS-RG system is engineered as a decoupled, multi-tiered campus safety grid 
 \subsection{Software Architecture Diagram}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{db_schema.png}
+\includegraphics[width=0.95\textwidth]{system_architecture.png}
 \caption{System Component Architecture \& High-Level Layering}
 \end{figure}
 
@@ -117,17 +154,16 @@ Monitors soldering stations, chemical storage, and prototype hardware developmen
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{iot_lab.png}
+\includegraphics[width=0.70\textwidth]{iot_lab.png}
 \caption{IoT Lab Node Hardware Circuit Diagram}
 \end{figure}
 
 \subsection{2. Server Room Node Circuit Diagram}
 Monitors high-density server racks, power distribution units, and electrical switches. Optimized for electrical fire detection and cooling fluid leak monitoring.\\
 \small \textbf{Live Wokwi Simulation:} \href{https://wokwi.com/projects/470509081717871617}{https://wokwi.com/projects/470509081717871617}
-
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{server_room.png}
+\includegraphics[width=0.70\textwidth]{server_room.png}
 \caption{Server Room Node Hardware Circuit Diagram}
 \end{figure}
 
@@ -137,7 +173,7 @@ Monitors high-performance computing clusters and student workstation clusters.\\
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{data_science_lab.png}
+\includegraphics[width=0.70\textwidth]{data_science_lab.png}
 \caption{Data Science Lab Node Hardware Circuit Diagram}
 \end{figure}
 
@@ -164,8 +200,8 @@ x_{\text{sensor}} = \min\left(1.0, \frac{\text{raw\_adc}}{\text{MaxADC}(\text{ra
 \toprule
 \textbf{Hazard Component} & \textbf{Weight ($w_i$)} & \textbf{Engineering \& Safety Justification} \\
 \midrule
-Fire ($w_{\text{fire}}$) & 40.0 & \textbf{Critical Life Safety Threat}: Thermal combustion spreads rapidly and presents immediate catastrophic risk to life and physical assets. Demands top weighting. \\
-Gas ($w_{\text{gas}}$) & 40.0 & \textbf{Explosion Risk}: Combustible gas accumulation (MQ2) creates severe explosion hazards in confined lab spaces. Equal priority to fire. \\
+Fire ($w_{\text{fire}}$) & 65.0 & \textbf{Critical Life Safety Threat}: Thermal combustion spreads rapidly and presents immediate catastrophic risk to life and physical assets. Demands top weighting. \\
+Gas ($w_{\text{gas}}$) & 65.0 & \textbf{Explosion Risk}: Combustible gas accumulation (MQ2) creates severe explosion hazards in confined lab spaces. Equal priority to fire. \\
 Water ($w_{\text{water}}$) & 30.0 & \textbf{Electrical Short \& Equipment Submersion}: Fluid leaks cause electrical shorts and equipment failure. \\
 Occupancy ($w_{\text{occ}}$) & 25.0 & \textbf{Human Life Multiplier}: Presence of occupants elevates emergency dispatch priority to ensure rapid evacuation. \\
 \bottomrule
@@ -200,7 +236,7 @@ The complete database ER diagram detailing entity relationships across \texttt{Z
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{db_schema.png}
+\includegraphics[width=1\textwidth]{db_schema.png}
 \caption{Database Entity-Relationship (ER) Diagram}
 \end{figure}
 
