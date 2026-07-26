@@ -6,6 +6,7 @@ import { useOpenIncidentsByZone } from "@/hooks/use-open-incidents-by-zone";
 import { TopBar } from "@/components/layout/top-bar";
 import { ZoneMap } from "@/components/dashboard/zone-map";
 import { DispatchLedger } from "@/components/dashboard/dispatch-ledger";
+import { NLReporter } from "@/components/ai-integration/nl-reporter";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
@@ -37,13 +38,14 @@ export default function DashboardPage() {
           <ZoneMap zones={zones} />
         </section>
 
-        <section aria-label="Dispatch ledger" className="min-w-0">
+        <section aria-label="Dispatch ledger" className="flex min-w-0 flex-col overflow-y-auto">
           <div className="border-b border-hairline bg-surface px-3 py-2">
             <h2 className="font-heading text-xs font-semibold tracking-widest text-text-muted uppercase">
               Priority ranking
             </h2>
           </div>
           <DispatchLedger ranked={priorityQueue} zones={zones} openIncidentsByZone={openIncidentsByZone} />
+          <NLReporter />
         </section>
       </main>
     </div>
