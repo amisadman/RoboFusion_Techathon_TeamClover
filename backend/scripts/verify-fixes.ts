@@ -551,9 +551,13 @@ async function main() {
   // TC7b reuses that incident while it's still OPEN.
   await checkTC7b(incidentId, adminCookie, staffCookie);
 
-  // F2 phase 2 (clear the hazard, confirm real decay back to SAFE).
+  // F2 phase 2 (clear the hazard, confirm real decay back to SAFE). Use the
+  // ACTUAL current risk_score as the peak reference, not a hardcoded
+  // assumption -- phase 1's real peak varies run to run (contribution mix,
+  // timing), and comparing against a stale guess produces false failures
+  // here even when decay is working correctly.
   const peakZones = await getZones(adminCookie);
-  const peakScore = incidentId ? 65 : findZone(peakZones, PRIMARY_ZONE).risk_score; // conservative floor if phase 1 failed
+  const peakScore = findZone(peakZones, PRIMARY_ZONE).risk_score;
   await checkF2Decay(primaryKey, adminCookie, peakScore);
 
   await checkTC13b(staffCookie);

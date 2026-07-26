@@ -36,8 +36,20 @@ export function NLReporter() {
     }).catch(() => {});
   }, []);
 
-  const supportsVoice = typeof window !== "undefined" &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  // Voice support depends on `window`, which doesn't exist during SSR --
+  // computing this inline during render (typeof window !== "undefined")
+  // makes the server-rendered HTML and the first client render disagree
+  // (mic button present/absent), which is a real hydration mismatch, not
+  // just a cosmetic warning. Start false on both server and first client
+  // render, then flip it after mount once we can actually check.
+  const [supportsVoice, setSupportsVoice] = useState(false);
+  useEffect(() => {
+    // Detecting a browser capability after mount, not deriving state from
+    // props/other state -- there's no way to know this before the effect
+    // runs client-side, so this one-time sync is the legitimate case.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSupportsVoice("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  }, []);
 
   const startListening = useCallback(() => {
     if (!supportsVoice) return;

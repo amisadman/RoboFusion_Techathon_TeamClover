@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { User02Icon, ArrowUp02Icon, ArrowDown02Icon, MinusIcon } from "@hugeicons/core-free-icons";
+import { User02Icon, ArrowUp02Icon, ArrowDown02Icon, MinusSignIcon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { formatRiskScore } from "@/lib/format";
 import { HAZARD_STATE_RANK } from "@/lib/status";
@@ -50,7 +50,7 @@ function ZoneBonusPanel({ zoneId }: { zoneId: string }) {
       ? ArrowUp02Icon
       : trend?.trend === "FALLING"
         ? ArrowDown02Icon
-        : MinusIcon;
+        : MinusSignIcon;
 
   const trendWord =
     trend?.trend === "RISING"
