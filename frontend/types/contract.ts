@@ -95,6 +95,8 @@ export interface PriorityUpdateEvent {
     occupied: boolean;
     seconds_critical: number;
     reason: string;
+    source?: "sensor" | "manual_override" | "nl_report";
+    incident_id?: string;
   }>;
 }
 

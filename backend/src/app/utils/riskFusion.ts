@@ -23,6 +23,12 @@ export interface FusionResult {
   };
 }
 
+export const RISK_THRESHOLDS = {
+  CRITICAL: 65.0,
+  WARNING: 30.0,
+  SAFE: 0.0,
+};
+
 const WEIGHTS = {
   fire: 40,
   gas: 40,

@@ -35,7 +35,7 @@ export async function handlePostReading(req: Request, res: Response) {
 
 export async function handleGetPriority(_req: Request, res: Response) {
   try {
-    const priorityQueue = getPriorityQueue();
+    const priorityQueue = await getPriorityQueue();
     return sendResponse(res, 200, true, "Priority queue retrieved successfully", { ranked: priorityQueue });
   } catch (error: any) {
     return sendResponse(res, 500, false, "Failed to retrieve priority queue", { error: error.message });

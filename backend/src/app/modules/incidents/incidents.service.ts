@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import { broadcastIncidentAcked } from "../../config/socket.js";
+import { recalculateAndBroadcastPriority } from "../readings/readings.service.js";
 
 export interface IncidentFilterOptions {
   from?: string;
@@ -135,6 +136,8 @@ export async function acknowledgeIncident(incidentId: string, userId: string) {
     acknowledged_by: userId,
     acknowledged_at: now.toISOString(),
   });
+
+  await recalculateAndBroadcastPriority();
 
   return {
     success: true,

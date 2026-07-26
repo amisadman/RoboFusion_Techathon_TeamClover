@@ -30,6 +30,13 @@ function acknowledgedByLabel(value: Incident["acknowledged_by_user"]): string {
   return value.name || value.email || "—";
 }
 
+function formatSourceLabel(source?: string | null): string {
+  if (!source) return "Sensor";
+  if (source === "manual_override") return "Manual Override";
+  if (source === "nl_report") return "NL Report";
+  return "Sensor";
+}
+
 function IncidentStatusBadge({ status }: { status: IncidentStatus }) {
   const config = INCIDENT_STATUS_CONFIG[status];
   return (
@@ -264,7 +271,7 @@ export default function IncidentsPage() {
                           {incident.hazard_types.length > 0 ? incident.hazard_types.join(", ") : "—"}
                         </TableCell>
                         <TableCell className="font-mono tabular-nums">{formatRiskScore(incident.peak_risk_score)}</TableCell>
-                        <TableCell className="text-text-muted">{incident.source}</TableCell>
+                        <TableCell className="text-text-muted text-xs font-medium">{formatSourceLabel(incident.source)}</TableCell>
                         <TableCell className="font-mono text-text-muted tabular-nums">
                           {formatDateTime(incident.opened_at)}
                         </TableCell>

@@ -41,21 +41,26 @@ export function updateZoneCacheItem(zoneId: string, item: Partial<ZoneCacheItem>
   };
 }
 
-export function getPriorityQueue() {
-  const criticalZones: CriticalZoneInfo[] = [];
-
-  Object.entries(zoneCache).forEach(([zoneId, item]) => {
-    if (item.state === "CRITICAL" && item.criticalStartedAt) {
-      criticalZones.push({
-        zone_id: zoneId,
-        risk_score: item.riskScore,
-        occupied: item.occupied,
-        criticalStartedAt: item.criticalStartedAt,
-      });
-    }
+export async function getPriorityQueue() {
+  const openIncidents = await prisma.incident.findMany({
+    where: { status: "OPEN" },
   });
 
-  return rankCriticalZones(criticalZones);
+  const cache = getZoneCache();
+  const criticalItems: CriticalZoneInfo[] = openIncidents.map((inc) => {
+    const cachedItem = cache[inc.zoneId];
+    return {
+      incident_id: inc.id,
+      zone_id: inc.zoneId,
+      risk_score: inc.peakRiskScore,
+      occupied: cachedItem?.occupied || false,
+      openedAt: inc.openedAt.getTime(),
+      source: inc.source as "sensor" | "manual_override" | "nl_report",
+      hazard_types: inc.hazardTypes,
+    };
+  });
+
+  return rankCriticalZones(criticalItems);
 }
 
 export async function processReading(payload: ReadingPayload): Promise<ReadingResponseAccepted> {
@@ -249,12 +254,12 @@ export async function processReading(payload: ReadingPayload): Promise<ReadingRe
     updated_at: new Date().toISOString(),
   });
 
-  recalculateAndBroadcastPriority();
+  await recalculateAndBroadcastPriority();
 
   return response;
 }
 
-export function recalculateAndBroadcastPriority() {
-  const ranked = getPriorityQueue();
+export async function recalculateAndBroadcastPriority() {
+  const ranked = await getPriorityQueue();
   broadcastPriorityUpdate({ ranked });
 }

@@ -1,6 +1,8 @@
 import { prisma } from "../../config/prisma.js";
 import { broadcastIncidentOpened } from "../../config/socket.js";
 import { isKnownHazardType, type HazardType } from "../../utils/hazardTypes.js";
+import { RISK_THRESHOLDS } from "../../utils/riskFusion.js";
+import { recalculateAndBroadcastPriority } from "../readings/readings.service.js";
 
 // ---------------------------------------------------------------------
 // BONUS 2: Short-Term Risk Trend (Moving average / slope)
@@ -142,9 +144,9 @@ export function parseNaturalLanguageReport(text: string): ExtractedSignal {
 // determine a zone's live state. Setting it cannot violate the hard
 // constraint above.
 function severityToIncidentScore(severity: "SAFE" | "WARNING" | "CRITICAL"): number {
-  if (severity === "CRITICAL") return 65.0; // floor of the CRITICAL band
-  if (severity === "WARNING") return 30.0; // floor of the WARNING band
-  return 0.0;
+  if (severity === "CRITICAL") return RISK_THRESHOLDS.CRITICAL; // 65.0 (CRITICAL band threshold)
+  if (severity === "WARNING") return RISK_THRESHOLDS.WARNING;   // 30.0 (WARNING band threshold)
+  return RISK_THRESHOLDS.SAFE;
 }
 
 export async function submitNaturalLanguageReport(text: string) {
@@ -208,9 +210,7 @@ export async function submitNaturalLanguageReport(text: string) {
     });
     incidentId = newIncident.id;
 
-    // Zone-state-independent broadcast: surfaces the new incident to
-    // connected dashboards in real time without touching zoneCache or the
-    // (deliberately sensor-only) priority queue.
+    // Realtime broadcast of open incident
     broadcastIncidentOpened({
       incident_id: newIncident.id,
       zone_id: zoneId,
@@ -235,6 +235,9 @@ export async function submitNaturalLanguageReport(text: string) {
       });
     }
   }
+
+  // Trigger real-time priority queue re-ranking so NL report incidents feed into priority ranking
+  await recalculateAndBroadcastPriority();
 
   return {
     parsed: true,

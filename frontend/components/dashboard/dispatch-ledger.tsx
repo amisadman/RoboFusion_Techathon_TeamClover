@@ -12,6 +12,13 @@ import type { PriorityUpdateEvent, ZoneSummary } from "@/types/contract";
 
 type Ranked = PriorityUpdateEvent["ranked"][number];
 
+function formatSourceLabel(source?: string | null): string {
+  if (!source) return "Sensor";
+  if (source === "manual_override") return "Manual Override";
+  if (source === "nl_report") return "NL Report";
+  return "Sensor";
+}
+
 function LedgerRow({
   row,
   zone,
@@ -34,6 +41,9 @@ function LedgerRow({
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="font-heading text-sm font-semibold text-foreground">
             {zone?.name ?? row.zone_id}
+          </span>
+          <span className="rounded-sm border border-hairline px-1 py-0.5 text-[0.625rem] font-medium text-text-muted">
+            {formatSourceLabel(row.source)}
           </span>
           {zone && <HazardStatusIndicator state={zone.state} size="sm" />}
           {row.occupied && (
