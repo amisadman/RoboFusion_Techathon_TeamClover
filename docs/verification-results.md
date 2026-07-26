@@ -395,3 +395,13 @@ final chat summary for what that does and its limitations.
 - **TC15 (Notification UX & Realtime Toasts)**: **PASS**. `realtime-toaster.tsx` triggers individual `sonner` toasts for every unique `incident:opened` event. Acknowledged incidents update status visually and stop demanding active attention.
 - **TC16 (Accessibility & Icon/Text Pairing)**: **PASS**. All status indicators and trend indicators pair explicit text labels ("SAFE", "WARNING", "CRITICAL", "OFFLINE", "Rising", "Falling", "Stable") with icons (`CheckmarkCircle02Icon`, `AlertCircleIcon`, `ArrowUp02Icon`, etc.), adhering to dual-channel accessibility guidelines.
 
+---
+
+## Bonus 4 Priority Queue Integration & Source Provenance Tag Pass
+
+- **Priority Queue Source Alignment**: **PASS**. `getPriorityQueue()` in `readings.service.ts` now queries all currently-`OPEN` `Incident` rows from Prisma (regardless of `source`). `nl_report` incidents are ranked by `peakRiskScore` (seeded directly from `RISK_THRESHOLDS.CRITICAL` = 65.0 or `WARNING` = 30.0), tiebroken by occupancy and elapsed time (`openedAt`).
+- **Source Provenance Display**: **PASS**. Both the `DispatchLedger` (priority queue) and the Incident Timeline render neutral text-muted metadata badges (`"Sensor"`, `"Manual Override"`, `"NL Report"`) without polluting the four live zone status colors.
+- **Safety Constraint 1 (Zone State Isolation)**: **CONFIRMED**. `submitNaturalLanguageReport` only creates/updates `Incident` rows and never mutates a `Zone`'s live `risk_score` or `state` fields.
+- **Safety Constraint 2 (Actuation Pipeline Isolation)**: **CONFIRMED**. `submitNaturalLanguageReport` has zero code paths to hardware commands (`led`, `buzzer`, `relay_cutoff`).
+
+
