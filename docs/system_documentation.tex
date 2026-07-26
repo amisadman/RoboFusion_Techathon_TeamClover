@@ -15,6 +15,10 @@
 \usepackage{tabularx}
 \usepackage{float}
 \usepackage{enumitem}
+\usepackage{needspace}
+
+% Configure graphicspath so images resolve on Overleaf (root upload) and locally
+\graphicspath{{../readme_resources/}{readme_resources/}{images/}{./}}
 
 \hypersetup{
     colorlinks=true,
@@ -43,7 +47,8 @@
     showspaces=false,
     showstringspaces=false,
     showtabs=false,
-    tabsize=2
+    tabsize=2,
+    samepage=true
 }
 
 \title{\textbf{\Large System Documentation: Smart Campus Safety \& Risk Grid (SCS-RG)}\\
@@ -86,8 +91,8 @@ The SCS-RG system is engineered as a decoupled, multi-tiered campus safety grid 
 \subsection{Software Architecture Diagram}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{../readme_resources/db_schema.png}
-\caption{System Component Architecture & High-Level Layering}
+\includegraphics[width=0.95\textwidth]{db_schema.png}
+\caption{System Component Architecture \& High-Level Layering}
 \end{figure}
 
 ---
@@ -101,7 +106,7 @@ Monitors soldering stations, chemical storage, and prototype hardware developmen
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{../readme_resources/iot_lab.png}
+\includegraphics[width=0.85\textwidth]{iot_lab.png}
 \caption{IoT Lab Node Hardware Circuit Diagram}
 \end{figure}
 
@@ -110,7 +115,7 @@ Monitors high-density server racks, power distribution units, and electrical swi
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{../readme_resources/server_room.png}
+\includegraphics[width=0.85\textwidth]{server_room.png}
 \caption{Server Room Node Hardware Circuit Diagram}
 \end{figure}
 
@@ -119,7 +124,7 @@ Monitors high-performance computing clusters and student workstation clusters.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{../readme_resources/data_science_lab.png}
+\includegraphics[width=0.85\textwidth]{data_science_lab.png}
 \caption{Data Science Lab Node Hardware Circuit Diagram}
 \end{figure}
 
@@ -182,19 +187,22 @@ The complete database ER diagram detailing entity relationships across \texttt{Z
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{../readme_resources/db_schema.png}
+\includegraphics[width=0.9\textwidth]{db_schema.png}
 \caption{Database Entity-Relationship (ER) Diagram}
 \end{figure}
 
 ---
 
+\newpage
 \section{API Endpoints Reference with Example Requests \& Responses}
 
-All API responses follow a unified JSON envelope format:
+All API responses follow a unified JSON envelope format. Below are the complete, unbroken payload examples for each endpoint.
 
 \subsection{1. Microcontroller Telemetry Ingestion (\texttt{POST /api/readings})}
 \paragraph{Request Header}: \texttt{X-Zone-Key: key\_server\_room\_456}
-\begin{lstlisting}[language=json]
+
+\needspace{14\baselineskip}
+\begin{lstlisting}[language=json, samepage=true]
 POST /api/readings HTTP/1.1
 Host: robofusion-techathon-teamclover.onrender.com
 Content-Type: application/json
@@ -214,8 +222,9 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
+\needspace{14\baselineskip}
 \paragraph{Response (200 OK)}:
-\begin{lstlisting}[language=json]
+\begin{lstlisting}[language=json, samepage=true]
 {
   "success": true,
   "message": "Reading ingested successfully",
@@ -229,9 +238,10 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
+\needspace{14\baselineskip}
 \subsection{2. Get All Active Zones (\texttt{GET /api/zones})}
 \paragraph{Response (200 OK)}:
-\begin{lstlisting}[language=json]
+\begin{lstlisting}[language=json, samepage=true]
 {
   "success": true,
   "message": "Zones retrieved successfully",
@@ -249,9 +259,10 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
+\needspace{14\baselineskip}
 \subsection{3. Priority Dispatch Queue (\texttt{GET /api/priority})}
 \paragraph{Response (200 OK)}:
-\begin{lstlisting}[language=json]
+\begin{lstlisting}[language=json, samepage=true]
 {
   "success": true,
   "message": "Priority queue retrieved successfully",
@@ -272,9 +283,10 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
+\needspace{14\baselineskip}
 \subsection{4. Atomic Incident Acknowledgment (\texttt{POST /api/incidents/:id/ack})}
 \paragraph{Response (200 OK)}:
-\begin{lstlisting}[language=json]
+\begin{lstlisting}[language=json, samepage=true]
 {
   "success": true,
   "message": "Incident acknowledged successfully",
@@ -288,9 +300,10 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
+\needspace{16\baselineskip}
 \subsection{5. Natural Language Incident Reporting (\texttt{POST /api/bonus/nl-report})}
 \paragraph{Request Payload}:
-\begin{lstlisting}[language=json]
+\begin{lstlisting}[language=json, samepage=true]
 POST /api/bonus/nl-report HTTP/1.1
 Content-Type: application/json
 
@@ -300,7 +313,7 @@ Content-Type: application/json
 \end{lstlisting}
 
 \paragraph{Response (200 OK)}:
-\begin{lstlisting}[language=json]
+\begin{lstlisting}[language=json, samepage=true]
 {
   "success": true,
   "message": "Natural language report processed successfully",
@@ -316,4 +329,6 @@ Content-Type: application/json
     "incident_id": "clx99201b0002"
   }
 }
-\end{lstlisting}\end{document}
+\end{lstlisting}
+
+\end{document}
