@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { formatRiskScore } from "@/lib/format";
 import { HAZARD_STATE_RANK } from "@/lib/status";
 import { HazardStatusIndicator } from "@/components/hazard-status-indicator";
+import { HazardBreakdown } from "@/components/dashboard/hazard-breakdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ZoneSummary } from "@/types/contract";
 
@@ -41,6 +42,7 @@ function ZoneCard({ zone }: { zone: ZoneSummary }) {
           </span>
         )}
       </CardContent>
+      <HazardBreakdown contributions={zone.contributions} riskScore={zone.risk_score} />
     </Card>
   );
 }

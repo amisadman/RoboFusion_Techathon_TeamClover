@@ -24,6 +24,11 @@ export interface ZoneSummary {
   // null for a zone that has never reported (Zone.lastSeenAt is nullable
   // in the DB -- zones.service.ts passes null through as-is).
   last_seen_at: string | null;
+  // Only present once a zone:state socket event has arrived for this zone
+  // this session -- the initial REST snapshot doesn't carry it, since
+  // GET /api/zones (zones.service.ts) doesn't return a contributions
+  // breakdown, only the socket event does.
+  contributions?: { fire: number; gas: number; water: number; occupancy: number };
 }
 
 export interface IncidentTransition {

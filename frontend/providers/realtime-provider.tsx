@@ -79,6 +79,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
           risk_score: evt.risk_score,
           occupied: evt.occupied,
           last_seen_at: evt.updated_at,
+          contributions: evt.contributions,
         } as ZoneSummary,
       }));
     });
