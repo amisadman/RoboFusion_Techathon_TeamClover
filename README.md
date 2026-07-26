@@ -19,7 +19,7 @@ Developed by **Team Clover**:
 **SCS-RG (Smart Campus Safety & Risk Grid)** is a production-grade, multi-hazard IoT emergency response and campus risk management platform. Built to safeguard critical campus infrastructure (such as server rooms, research laboratories, and data centers), SCS-RG combines real-time hardware telemetry ingestion, multi-hazard risk fusion, automated incident dispatching, predictive AI risk analysis, and dual-channel safety alerting.
 
 ### Key Capabilities & Architectural Highlights
-- **Bounded Multi-Hazard Risk Fusion Engine**: Real-time evaluation of Flame, Gas, Water, and Occupancy signals ($w_{\text{fire}}=40, w_{\text{gas}}=40, w_{\text{water}}=30, w_{\text{occ}}=25$ capped at 100.0) with dynamic 12-bit ESP32 vs 10-bit Arduino ADC scaling and $N=3$ flame debounce filters.
+- **Bounded Multi-Hazard Risk Fusion Engine**: Real-time evaluation of Flame, Gas, Water, and Occupancy signals ($w_{\text{fire}}=65, w_{\text{gas}}=65, w_{\text{water}}=30, w_{\text{occ}}=25$ capped at 100.0) with dynamic 12-bit ESP32 vs 10-bit Arduino ADC scaling and $N=3$ flame debounce filters.
 - **Atomic Priority Dispatch Queue**: Dynamic sorting of open incidents by `peak_risk_score` (DESC) -> `occupied` (DESC) -> `seconds_open` (DESC) with concurrency-safe single-write incident acknowledgments (`WHERE acknowledgedBy IS NULL`).
 - **Short-Term Risk Trend Analyzer (Bonus 2)**: Rolling 5-reading slope calculation classifying zone trends into `RISING`, `FALLING`, or `STABLE`.
 - **Logistic Regression ML Risk Predictor (Bonus 3)**: Isolated advisory Sigmoid model ($P(\text{Critical}) = \frac{1}{1 + e^{-z}}$) estimating 5-minute failure probability without touching hardware actuation circuits.
