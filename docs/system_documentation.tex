@@ -316,39 +316,4 @@ Content-Type: application/json
     "incident_id": "clx99201b0002"
   }
 }
-\end{lstlisting}
-
----
-
-\section{System Setup \& Verification Summary}
-
-\subsection{Installation Commands}
-\begin{lstlisting}[language=bash]
-# Install dependencies
-npm install
-
-# Push database schema & seed initial accounts/zones
-npx prisma db push && npx prisma db seed
-
-# Run production server
-npm run build && npm start
-\end{lstlisting}
-
-\subsection{Verification Matrix (Rubric Test Cases 26--30)}
-\begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{c X c}
-\toprule
-\textbf{Test Case} & \textbf{Requirement Metric} & \textbf{Status} \\
-\midrule
-TC26 & Circuit diagrams per zone (IoT Lab, Server Room, Data Science Lab) & PASS \\
-TC27 & Full System Component Architecture Diagram & PASS \\
-TC28 & Complete API Documentation with Example Request/Response JSON & PASS \\
-TC29 & Database ER Diagram & PASS \\
-TC30 & Bounded Risk Fusion Formula with Weight Justification & PASS \\
-\bottomrule
-\end{tabularx}
-\caption{System Documentation Verification Summary}
-\end{table}
-
-\end{document}
+\end{lstlisting}\end{document}
