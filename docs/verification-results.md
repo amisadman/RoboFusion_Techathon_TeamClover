@@ -382,3 +382,16 @@ shared database, and left `iot_lab` in `OFFLINE` state (F1's own test
 condition — deliberate, to prove the sweep works). **Run
 `npm run reset:demo` before recording any demo material** — see the
 final chat summary for what that does and its limitations.
+
+---
+
+## Section C Self-Check Verification (Final Completeness Pass)
+
+- **TC12a (Live Zone Map Updates)**: **PASS**. Socket.io event listeners (`zone:state`, `zone:offline`) update `zones` React state dynamically in `realtime-provider.tsx`, triggering instant re-renders of `ZoneMap` and `ZoneCard` without manual browser refresh.
+- **TC12b (Priority Queue Ranking)**: **PASS**. `priority:update` Socket.io event updates `priorityQueue` state, ordering CRITICAL zones by `risk_score DESC` $\rightarrow$ `occupied DESC` $\rightarrow$ `seconds_critical DESC`.
+- **TC12c (Verbatim Ranking Reason)**: **PASS**. `DispatchLedger` (`components/dashboard/dispatch-ledger.tsx`) renders `item.reason` string verbatim for each ranked zone.
+- **TC13a/b (Server-Side RBAC Enforcement)**: **PASS**. Admin-only endpoints (`POST /api/zones`, `GET /api/zones/:id/key`, `POST /api/zones/:id/override`) are protected by `requireSession` and `requireAdmin` middleware, returning `403 Forbidden` for non-admin sessions.
+- **TC14 (Incident Timeline & Filtering)**: **PASS**. `frontend/app/incidents/page.tsx` supports filtering by `zone_id`, `status`, and date range (`from`/`to`), and displays full transition histories (`transitions`) per incident.
+- **TC15 (Notification UX & Realtime Toasts)**: **PASS**. `realtime-toaster.tsx` triggers individual `sonner` toasts for every unique `incident:opened` event. Acknowledged incidents update status visually and stop demanding active attention.
+- **TC16 (Accessibility & Icon/Text Pairing)**: **PASS**. All status indicators and trend indicators pair explicit text labels ("SAFE", "WARNING", "CRITICAL", "OFFLINE", "Rising", "Falling", "Stable") with icons (`CheckmarkCircle02Icon`, `AlertCircleIcon`, `ArrowUp02Icon`, etc.), adhering to dual-channel accessibility guidelines.
+
