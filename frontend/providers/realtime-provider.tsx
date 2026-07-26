@@ -20,45 +20,52 @@ type IncidentEvent =
   | { type: "acked"; payload: IncidentAckedEvent; at: number }
   | { type: "resolved"; payload: IncidentResolvedEvent; at: number };
 
+export interface RiskHistoryPoint {
+  timestamp: string;
+  risk_score: number;
+}
+
 interface RealtimeContextValue {
   connected: boolean;
   zones: Record<string, ZoneSummary>;
   priorityQueue: PriorityUpdateEvent["ranked"];
-  // Bounded feed for the notification/toast system (Test 15) to consume
-  // in M4 -- newest last. Not persisted; refresh incident history via
-  // api.getIncidents() for the actual timeline (Test 14).
   incidentEvents: IncidentEvent[];
+  historyBuffer: Record<string, RiskHistoryPoint[]>;
 }
 
 const RealtimeContext = createContext<RealtimeContextValue | null>(null);
 
 const MAX_INCIDENT_EVENTS = 50;
+const MAX_HISTORY_POINTS = 60;
 
 export function RealtimeProvider({ children }: { children: ReactNode }) {
   const [connected, setConnected] = useState(false);
   const [zones, setZones] = useState<Record<string, ZoneSummary>>({});
   const [priorityQueue, setPriorityQueue] = useState<PriorityUpdateEvent["ranked"]>([]);
   const [incidentEvents, setIncidentEvents] = useState<IncidentEvent[]>([]);
+  const [historyBuffer, setHistoryBuffer] = useState<Record<string, RiskHistoryPoint[]>>({});
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    // Initial snapshot via REST so the dashboard isn't blank while
-    // waiting for the first WebSocket event (Test 12a is about live
-    // updates without a manual refresh, not about the very first paint).
+    // Initial snapshot via REST
     api
       .getZones()
       .then((list) => {
-        // Merge, don't replace: a zone:state event can arrive (10Hz
-        // firmware sampling) before this REST call resolves, especially
-        // against a cold-started backend. Replacing wholesale here would
-        // silently clobber that fresher socket data with this snapshot's
-        // stale-by-comparison values. Existing (socket-derived) fields win;
-        // REST still supplies fields sockets never carry (name,
-        // hazard_profile) and seeds zones with no socket activity yet.
         setZones((prev) => {
           const merged: Record<string, ZoneSummary> = { ...prev };
           for (const z of list) merged[z.zone_id] = { ...z, ...merged[z.zone_id] };
           return merged;
+        });
+
+        setHistoryBuffer((prev) => {
+          const updated = { ...prev };
+          const nowIso = new Date().toISOString();
+          for (const z of list) {
+            if (!updated[z.zone_id] || updated[z.zone_id].length === 0) {
+              updated[z.zone_id] = [{ timestamp: z.last_seen_at || nowIso, risk_score: z.risk_score }];
+            }
+          }
+          return updated;
         });
       })
       .catch((err) => console.error("initial /api/zones fetch failed", err));
@@ -82,6 +89,16 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
           contributions: evt.contributions,
         } as ZoneSummary,
       }));
+
+      setHistoryBuffer((prev) => {
+        const currentBuffer = prev[evt.zone_id] || [];
+        const newPoint: RiskHistoryPoint = { timestamp: evt.updated_at, risk_score: evt.risk_score };
+        const updatedBuffer = [...currentBuffer, newPoint].slice(-MAX_HISTORY_POINTS);
+        return {
+          ...prev,
+          [evt.zone_id]: updatedBuffer,
+        };
+      });
     });
 
     socket.on("priority:update", (evt: PriorityUpdateEvent) => {
@@ -119,7 +136,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <RealtimeContext.Provider value={{ connected, zones, priorityQueue, incidentEvents }}>
+    <RealtimeContext.Provider value={{ connected, zones, priorityQueue, incidentEvents, historyBuffer }}>
       {children}
     </RealtimeContext.Provider>
   );

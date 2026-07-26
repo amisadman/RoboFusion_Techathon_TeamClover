@@ -40,7 +40,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "dark h-full antialiased",
+        "h-full antialiased",
         plexSans.variable,
         plexSansCondensed.variable,
         plexMono.variable,

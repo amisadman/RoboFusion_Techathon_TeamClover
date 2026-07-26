@@ -1,12 +1,16 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { WifiConnected02Icon, WifiDisconnected02Icon, Logout01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
+import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRealtime } from "@/providers/realtime-provider";
 import { useSession, signOut } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,13 +27,45 @@ const NAV_LINKS = [
   { href: "/admin", label: "Admin" },
 ];
 
-function initials(name: string) {
+function initials(name?: string | null) {
+  if (!name) return "";
   return name
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
+}
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon-xs" aria-label="Toggle theme">
+        <Sun className="size-3.5" />
+      </Button>
+    );
+  }
+
+  const isDark = theme === "dark";
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon-xs"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      title={`Switch to ${isDark ? "light" : "dark"} mode`}
+    >
+      {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+    </Button>
+  );
 }
 
 export function TopBar() {
@@ -78,7 +114,7 @@ export function TopBar() {
 
       <span className="hidden shrink-0 font-mono text-xs whitespace-nowrap text-text-muted sm:inline">{summary}</span>
 
-      <div className="ml-auto flex shrink-0 items-center gap-4">
+      <div className="ml-auto flex shrink-0 items-center gap-3">
         <span className="inline-flex items-center gap-1.5" role="status">
           <span
             className={cn("inline-block size-1.5 rounded-full", connected ? "bg-safe" : "bg-offline")}
@@ -94,21 +130,23 @@ export function TopBar() {
           </span>
         </span>
 
+        <ThemeToggle />
+
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="flex items-center gap-2 rounded-sm p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              className="flex cursor-pointer items-center gap-2 rounded-sm p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               aria-label="User menu"
             >
               <Avatar size="sm">
                 <AvatarFallback>
-                  {initials(user.name || user.email) || <HugeiconsIcon icon={UserAccountIcon} className="size-3.5" />}
+                  {initials(user?.name || user?.email) || <HugeiconsIcon icon={UserAccountIcon} className="size-3.5" />}
                 </AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel className="flex flex-col gap-0.5">
-                <span className="font-medium text-foreground">{user.name || user.email}</span>
+                <span className="font-medium text-foreground">{user?.name || user?.email || "User"}</span>
                 <span className="text-[0.625rem] uppercase tracking-wide text-text-muted">{role}</span>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

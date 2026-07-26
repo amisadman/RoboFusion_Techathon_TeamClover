@@ -57,10 +57,54 @@
   --radius-4xl: calc(var(--radius) * 1.8);
 }
 
-/* SCS-RG instrument-panel palette. Single fixed dark theme -- this is a
-   staff command dashboard, not a themeable product, so :root and .dark
-   carry the same values on purpose. */
-:root,
+/* SCS-RG Light Theme (:root) */
+:root {
+  --canvas: #F6F7F9;
+  --surface: #FFFFFF;
+  --hairline: #E1E4E9;
+  --text-primary: #1B1B1B;
+  --text-muted: #5B6472;
+  --brand-accent: #2C317D;
+  --safe: #15A966;
+  --warning: #B45309;
+  --critical: #DC2626;
+  --offline: #6B7280;
+
+  --background: var(--canvas);
+  --foreground: var(--text-primary);
+  --card: var(--surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--brand-accent);
+  --primary-foreground: #FFFFFF;
+  --secondary: #EBEFE5;
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface);
+  --muted-foreground: var(--text-muted);
+  --accent: #F0F4F8;
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--critical);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--brand-accent);
+  --chart-1: var(--brand-accent);
+  --chart-2: var(--safe);
+  --chart-3: var(--warning);
+  --chart-4: var(--critical);
+  --chart-5: var(--offline);
+  --radius: 0.2rem;
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--brand-accent);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F0F4F8;
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--hairline);
+  --sidebar-ring: var(--brand-accent);
+}
+
+/* SCS-RG Dark Theme (.dark) */
 .dark {
   --canvas: #0a0e13;
   --surface: #121820;
@@ -79,10 +123,6 @@
   --card-foreground: var(--text-primary);
   --popover: var(--surface);
   --popover-foreground: var(--text-primary);
-  /* brand-accent is reserved for links, focus rings, and primary buttons
-     only -- shadcn's hover/highlight "accent" semantic (below) stays a
-     neutral surface tone so it never bleeds brand cyan into every
-     menu/select hover state. */
   --primary: var(--brand-accent);
   --primary-foreground: var(--canvas);
   --secondary: #1a222c;
