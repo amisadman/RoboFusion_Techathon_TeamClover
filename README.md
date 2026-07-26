@@ -4,6 +4,7 @@ Developed by **Team Clover**:
 
 * **Live Web Dashboard URL:** [https://clover-scs-rg.vercel.app/](https://clover-scs-rg.vercel.app/)
 * **Production Live API Base URL:** [https://robofusion-techathon-teamclover.onrender.com](https://robofusion-techathon-teamclover.onrender.com)
+* **System Documentation (PDF):** [docs/system_documentation.pdf](docs/system_documentation.pdf) | [LaTeX Source](docs/system_documentation.tex)
 
 | Name | University | GitHub / Portfolio |
 | :--- | :--- | :--- |
@@ -77,22 +78,22 @@ flowchart TD
 
 The SCS-RG backend uses PostgreSQL with Prisma ORM. Key entity relationships:
 
-![Database Schema](readme_resources/db_schema.png)
+![Database ER Diagram](readme_resources/db_schema.png)
 
 ---
 
-## Wokwi Hardware Simulations
+## Hardware Sensor Circuit Diagrams (Per Zone)
 
 The hardware nodes simulate real ESP32 microcontrollers wired to analog Flame, Gas (MQ2), Water Level, and PIR Motion sensors:
 
-### 1. IoT Lab Node
-![IoT Lab ESP32 Wokwi Simulation](readme_resources/wokwi_iot_lab.png)
+### 1. IoT Lab Node Circuit Diagram
+![IoT Lab Circuit Diagram](readme_resources/iot_lab.png)
 
-### 2. Server Room Node
-![Server Room ESP32 Wokwi Simulation](readme_resources/wokwi_server_room.png)
+### 2. Server Room Node Circuit Diagram
+![Server Room Circuit Diagram](readme_resources/server_room.png)
 
-### 3. Data Science Lab Node
-![Data Science Lab ESP32 Wokwi Simulation](readme_resources/wokwi_data_science_lab.png)
+### 3. Data Science Lab Node Circuit Diagram
+![Data Science Lab Circuit Diagram](readme_resources/data_science_lab.png)
 
 ---
 
@@ -144,8 +145,10 @@ RoboFusion_Techathon_TeamClover/
 │   ├── hooks/                      # Custom React hooks
 │   ├── lib/                        # API client, auth client, format utilities
 │   └── providers/                  # Realtime Socket.io & Theme providers
-├── docs/                           # Documentation & Audit reports
-└── readme_resources/               # Architecture diagrams and UI screenshots
+├── docs/                           # System Documentation & Audit reports
+│   ├── system_documentation.pdf    # System Documentation PDF
+│   └── system_documentation.tex    # System Documentation LaTeX source
+└── readme_resources/               # Hardware circuit diagrams, DB ER diagram, and UI screenshots
 ```
 
 ---
