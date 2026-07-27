@@ -19,10 +19,15 @@
 \usepackage{setspace}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
+
 \setstretch{1.2}
 \titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
 \titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Smart Campus Safety \& Risk Grid}\fancyhead[R]{System Documentation}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Smart Campus Safety \& Risk Grid}
+\fancyhead[R]{System Documentation}
+\fancyfoot[C]{\thepage}
 
 % Configure graphicspath so images resolve on Overleaf (root upload) and locally
 \graphicspath{{../readme_resources/}{readme_resources/}{images/}{./}}
@@ -62,6 +67,7 @@
 
 \begin{document}
 
+% --- TITLE PAGE ---
 \begin{titlepage}
 \centering
 \vspace*{2cm}
@@ -72,7 +78,8 @@
 {\large Hardware Design • Software Architecture • API Reference • Risk Fusion Engine\par}
 \vfill
 {\Large\textbf{Team Clover}\par}
-Sadman Islam\\Shah Samin Yasar\\Ahmed Thousif Thisham
+\vspace{0.2cm}
+\href{https://github.com/amisadman}{Sadman Islam} \quad \href{https://shahsaminyasar.vercel.app/}{Shah Samin Yasar} \quad \href{https://ahmedthousifportfolio.vercel.app/}{Ahmed Thousif Thisham}
 
 \vspace{0.8cm}
 Metropolitan University
@@ -106,19 +113,17 @@ Metropolitan University
 \today
 \end{titlepage}
 
-
-% --- PAGE 1: TITLE, CLICKABLE AUTHORS, LINKS, ABSTRACT ---
-
 \thispagestyle{empty}
-
 \newpage
 
-% --- PAGE 2: TABLE OF CONTENTS ---
+% --- PAGE 2: TABLE OF CONTENTS & ABSTRACT ---
 \thispagestyle{plain}
 \tableofcontents
-\newpage\section*{Abstract}\large
+\newpage
+\section*{Abstract}\large
 This document serves as the complete \textbf{System Documentation} for the \textbf{Smart Campus Safety \& Risk Grid (SCS-RG)}. Built for multi-hazard IoT emergency monitoring and campus safety management, SCS-RG integrates ESP32 hardware sensor nodes, a bounded multi-hazard risk fusion engine, real-time WebSocket state streaming, atomic incident priority dispatching, a predictive logistic regression model, and a natural-language incident parsing engine. This document details per-zone hardware circuit diagrams, software architecture specifications, database ER diagrams, mathematically justified risk fusion formulas, and complete REST API endpoint specifications with example payloads.
 \normalsize
+\newpage
 
 % --- PAGE 3+: MAIN DOCUMENTATION CONTENT STARTS ---
 \section{System Overview \& Software Architecture}
@@ -161,6 +166,7 @@ Monitors soldering stations, chemical storage, and prototype hardware developmen
 \subsection{2. Server Room Node Circuit Diagram}
 Monitors high-density server racks, power distribution units, and electrical switches. Optimized for electrical fire detection and cooling fluid leak monitoring.\\
 \small \textbf{Live Wokwi Simulation:} \href{https://wokwi.com/projects/470509081717871617}{https://wokwi.com/projects/470509081717871617}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.70\textwidth]{server_room.png}
@@ -236,7 +242,7 @@ The complete database ER diagram detailing entity relationships across \texttt{Z
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=1\textwidth]{db_schema.png}
+\includegraphics[width=1.0\textwidth]{db_schema.png}
 \caption{Database Entity-Relationship (ER) Diagram}
 \end{figure}
 
@@ -245,12 +251,12 @@ The complete database ER diagram detailing entity relationships across \texttt{Z
 \newpage
 \section{API Endpoints Reference with Example Requests \& Responses}
 
-All API responses follow a unified JSON envelope format. Below are the complete, unbroken payload examples for each endpoint.
-
-\subsection{1. Microcontroller Telemetry Ingestion (\texttt{POST /api/readings})}
-\paragraph{Request Header}: \texttt{X-Zone-Key: key\_server\_room\_456}
+All API responses follow a unified JSON envelope format. Below are complete, unbroken payload examples for all 14 backend REST routes.
 
 \needspace{14\baselineskip}
+\subsection{1. Microcontroller Telemetry Ingestion (\texttt{POST /api/readings})}
+\paragraph{Auth Header}: \texttt{X-Zone-Key: key\_server\_room\_456}
+
 \begin{lstlisting}[language=json, samepage=true]
 POST /api/readings HTTP/1.1
 Host: robofusion-techathon-teamclover.onrender.com
@@ -271,7 +277,6 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
-\needspace{14\baselineskip}
 \paragraph{Response (200 OK)}:
 \begin{lstlisting}[language=json, samepage=true]
 {
@@ -289,6 +294,8 @@ X-Zone-Key: key_server_room_456
 
 \needspace{14\baselineskip}
 \subsection{2. Get All Active Zones (\texttt{GET /api/zones})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
 \paragraph{Response (200 OK)}:
 \begin{lstlisting}[language=json, samepage=true]
 {
@@ -309,7 +316,84 @@ X-Zone-Key: key_server_room_456
 \end{lstlisting}
 
 \needspace{14\baselineskip}
-\subsection{3. Priority Dispatch Queue (\texttt{GET /api/priority})}
+\subsection{3. Create New Zone (\texttt{POST /api/zones})}
+\paragraph{Auth}: Active Session Cookie (Admin Only)
+
+\paragraph{Request Payload}:
+\begin{lstlisting}[language=json, samepage=true]
+POST /api/zones HTTP/1.1
+Content-Type: application/json
+
+{
+  "zone_id": "robotics_lab",
+  "name": "Robotics & Automation Lab",
+  "hazard_profile": "High voltage motor drivers & lithium battery storage"
+}
+\end{lstlisting}
+
+\paragraph{Response (201 Created)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "Zone created successfully",
+  "data": {
+    "zone_id": "robotics_lab",
+    "name": "Robotics & Automation Lab",
+    "hazard_profile": "High voltage motor drivers & lithium battery storage",
+    "api_key": "key_robotics_lab_8921a"
+  }
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{4. Get Zone API Key (\texttt{GET /api/zones/:id/key})}
+\paragraph{Auth}: Active Session Cookie (Admin Only)
+
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "API key retrieved successfully",
+  "data": {
+    "zone_id": "server_room",
+    "api_key": "key_server_room_456"
+  }
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{5. Manual Zone State Override (\texttt{POST /api/zones/:id/override})}
+\paragraph{Auth}: Active Session Cookie (Admin Only)
+
+\paragraph{Request Payload}:
+\begin{lstlisting}[language=json, samepage=true]
+POST /api/zones/server_room/override HTTP/1.1
+Content-Type: application/json
+
+{
+  "state": "CRITICAL",
+  "reason": "Scheduled drill exercise"
+}
+\end{lstlisting}
+
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "Zone state override applied successfully",
+  "data": {
+    "zone_id": "server_room",
+    "state": "CRITICAL",
+    "risk_score": 100.0,
+    "override_active": true
+  }
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{6. Priority Dispatch Queue (\texttt{GET /api/priority})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
 \paragraph{Response (200 OK)}:
 \begin{lstlisting}[language=json, samepage=true]
 {
@@ -333,7 +417,63 @@ X-Zone-Key: key_server_room_456
 \end{lstlisting}
 
 \needspace{14\baselineskip}
-\subsection{4. Atomic Incident Acknowledgment (\texttt{POST /api/incidents/:id/ack})}
+\subsection{7. Get Historical Incidents (\texttt{GET /api/incidents})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "Incidents retrieved successfully",
+  "data": [
+    {
+      "id": "clx82910a0001",
+      "zone_id": "server_room",
+      "status": "OPEN",
+      "hazard_types": ["fire", "gas"],
+      "peak_risk_score": 73.2,
+      "source": "sensor",
+      "opened_at": "2026-07-26T14:30:00.000Z"
+    }
+  ]
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{8. Get Incident Details \& Timeline (\texttt{GET /api/incidents/:id})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "Incident details retrieved successfully",
+  "data": {
+    "id": "clx82910a0001",
+    "zone_id": "server_room",
+    "status": "ACKNOWLEDGED",
+    "hazard_types": ["fire", "gas"],
+    "peak_risk_score": 73.2,
+    "source": "sensor",
+    "opened_at": "2026-07-26T14:30:00.000Z",
+    "acknowledged_by": "usr_admin_123",
+    "acknowledged_at": "2026-07-26T14:31:00.000Z",
+    "transitions": [
+      {
+        "from_state": "SAFE",
+        "to_state": "CRITICAL",
+        "risk_score": 73.2,
+        "occurred_at": "2026-07-26T14:30:00.000Z"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{9. Atomic Incident Acknowledgment (\texttt{POST /api/incidents/:id/ack})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
 \paragraph{Response (200 OK)}:
 \begin{lstlisting}[language=json, samepage=true]
 {
@@ -349,8 +489,48 @@ X-Zone-Key: key_server_room_456
 }
 \end{lstlisting}
 
+\needspace{14\baselineskip}
+\subsection{10. Short-Term Risk Trend (\texttt{GET /api/bonus/trend/:zone\_id})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "Risk trend calculated successfully",
+  "data": {
+    "zone_id": "server_room",
+    "trend": "RISING",
+    "slope": 4.5,
+    "current_risk_score": 73.2,
+    "trending_critical": true
+  }
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{11. Logistic Regression ML Risk Predictor (\texttt{GET /api/bonus/ml-predict/:zone\_id})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "success": true,
+  "message": "ML risk prediction calculated successfully",
+  "data": {
+    "zone_id": "server_room",
+    "predicted_critical_probability": 0.885,
+    "predicted_critical_next_5m": true,
+    "model": "logistic_regression_v1",
+    "safety_guarantee": "Predictor is strictly advisory and cannot trigger relay/buzzer actuation"
+  }
+}
+\end{lstlisting}
+
 \needspace{16\baselineskip}
-\subsection{5. Natural Language Incident Reporting (\texttt{POST /api/bonus/nl-report})}
+\subsection{12. Natural Language Incident Reporting (\texttt{POST /api/bonus/nl-report})}
+\paragraph{Auth}: Active Session Cookie (Staff/Admin)
+
 \paragraph{Request Payload}:
 \begin{lstlisting}[language=json, samepage=true]
 POST /api/bonus/nl-report HTTP/1.1
@@ -376,6 +556,34 @@ Content-Type: application/json
     },
     "validation_gate": "passed",
     "incident_id": "clx99201b0002"
+  }
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{13. System Health Verification (\texttt{GET /health})}
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "status": "ok",
+  "timestamp": "2026-07-26T14:35:00.000Z",
+  "database": "connected",
+  "socket_server": "active"
+}
+\end{lstlisting}
+
+\needspace{14\baselineskip}
+\subsection{14. System Stress \& Load Test Status (\texttt{GET /load-test})}
+\paragraph{Response (200 OK)}:
+\begin{lstlisting}[language=json, samepage=true]
+{
+  "status": "idle",
+  "active_simulated_nodes": 0,
+  "telemetry_rate_hz": 10,
+  "last_run_stats": {
+    "duration_seconds": 60,
+    "total_payloads_ingested": 600,
+    "avg_latency_ms": 12.4
   }
 }
 \end{lstlisting}
