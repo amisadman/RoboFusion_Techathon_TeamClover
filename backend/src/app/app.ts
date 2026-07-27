@@ -8,6 +8,7 @@ import readingsRouter from "./modules/readings/readings.router.js";
 import zonesRouter from "./modules/zones/zones.router.js";
 import incidentsRouter from "./modules/incidents/incidents.router.js";
 import bonusRouter from "./modules/bonus/bonus.router.js";
+import loadTestRouter from "../load-test-route.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
@@ -42,5 +43,6 @@ app.use("/api", readingsRouter);
 app.use("/api", zonesRouter);
 app.use("/api", incidentsRouter);
 app.use("/api", bonusRouter);
+app.use("/api", loadTestRouter);
 
 export default app;
